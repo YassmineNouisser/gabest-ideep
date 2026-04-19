@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Plan de présentation — GaBest</title>
+<style>
+  @page {
+    size: A4;
+    margin: 15mm 14mm 18mm 14mm;
+    @bottom-right { content: "Slide " counter(page) " / " counter(pages); font-size: 9pt; color: #6b7280; }
+    @bottom-left { content: "GaBest — Plan de présentation"; font-size: 9pt; color: #6b7280; }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #111827;
+    font-size: 10.5pt;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .cover {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: linear-gradient(135deg, #0c4a6e 0%, #0e7490 50%, #059669 100%);
+    color: white;
+    padding: 35mm 18mm;
+    margin: -15mm -14mm 0 -14mm;
+    page-break-after: always;
+  }
+  .cover .tag {
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    font-size: 10pt;
+    opacity: .85;
+    border: 1px solid rgba(255,255,255,.5);
+    padding: 5px 14px;
+    border-radius: 20px;
+    align-self: flex-start;
+    margin-bottom: 25px;
+  }
+  .cover h1 { font-size: 50pt; margin: 0 0 8px 0; font-weight: 800; letter-spacing: -2px; }
+  .cover h2 { font-size: 18pt; font-weight: 300; margin: 0 0 30px 0; opacity: .95; }
+  .cover .total {
+    display: flex; gap: 25px; margin-top: 30px;
+  }
+  .cover .total div {
+    border: 1px solid rgba(255,255,255,.4);
+    border-radius: 8px; padding: 10px 18px;
+  }
+  .cover .total .num { font-size: 24pt; font-weight: 800; display: block; }
+  .cover .total .lbl { font-size: 9pt; opacity: .85; text-transform: uppercase; letter-spacing: 2px; }
+  .cover .bottom {
+    margin-top: auto;
+    font-size: 10pt;
+    opacity: .85;
+    border-top: 1px solid rgba(255,255,255,.3);
+    padding-top: 12px;
+  }
+
+  .slide {
+    page-break-after: always;
+    min-height: 260mm;
+    position: relative;
+    padding: 8mm 0;
+  }
+  .slide-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid #059669;
+    padding-bottom: 8px;
+    margin-bottom: 18px;
+  }
+  .slide-num {
+    display: inline-block;
+    background: #059669;
+    color: white;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 10pt;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .slide-duration {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 9pt;
+    font-weight: 600;
+  }
+  .slide-part {
+    color: #6b7280;
+    font-size: 9pt;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .slide h1 {
+    color: #064e3b;
+    font-size: 24pt;
+    margin: 10px 0 6px 0;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+  .slide .subtitle {
+    color: #047857;
+    font-size: 13pt;
+    font-weight: 400;
+    margin-bottom: 20px;
+  }
+  .slide h2 {
+    color: #065f46;
+    font-size: 13pt;
+    margin: 16px 0 6px 0;
+    border-left: 4px solid #10b981;
+    padding-left: 8px;
+  }
+  .slide h3 {
+    color: #064e3b;
+    font-size: 11pt;
+    margin: 10px 0 4px 0;
+  }
+  .slide ul, .slide ol { margin: 4px 0 10px 20px; padding: 0; }
+  .slide li { margin-bottom: 3px; }
+  .slide p { margin: 6px 0; }
+
+  .speaker-notes {
+    background: #f0fdfa;
+    border-left: 4px solid #14b8a6;
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin-top: 18px;
+    page-break-inside: avoid;
+  }
+  .speaker-notes h3 {
+    color: #0f766e;
+    font-size: 9.5pt;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0 0 6px 0;
+  }
+  .speaker-notes p, .speaker-notes li {
+    font-size: 9.5pt;
+    color: #134e4a;
+    font-style: italic;
+  }
+
+  .visual {
+    background: #fafaf9;
+    border: 1px dashed #94a3b8;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 9.5pt;
+    color: #475569;
+  }
+  .visual strong { color: #0f172a; }
+
+  .transition {
+    background: #fff7ed;
+    border-left: 4px solid #f97316;
+    padding: 8px 14px;
+    border-radius: 4px;
+    margin-top: 14px;
+    font-size: 9.5pt;
+    color: #7c2d12;
+  }
+  .transition strong { color: #9a3412; }
+
+  code {
+    background: #f3f4f6;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 9.5pt;
+    color: #b91c1c;
+    font-family: "SF Mono", Menlo, monospace;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 9.5pt;
+  }
+  th, td {
+    border: 1px solid #d1d5db;
+    padding: 5px 8px;
+    text-align: left;
+  }
+  th { background: #064e3b; color: white; font-weight: 600; }
+  tr:nth-child(even) td { background: #f0fdf4; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 8.5pt;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .badge.tech { background: #dbeafe; color: #1e40af; }
+  .badge.xai { background: #fce7f3; color: #9d174d; }
+  .badge.eco { background: #fef3c7; color: #92400e; }
+
+  .two-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  .col-box {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .col-box h3 { margin-top: 0; }
+
+  .timeline {
+    display: grid;
+    grid-template-columns: 60px 1fr 80px;
+    gap: 8px;
+    align-items: start;
+    margin-top: 12px;
+  }
+  .timeline-item {
+    display: contents;
+  }
+  .timeline-time {
+    background: #064e3b;
+    color: white;
+    border-radius: 4px;
+    text-align: center;
+    padding: 4px 2px;
+    font-weight: 700;
+    font-size: 9pt;
+  }
+  .timeline-title {
+    font-weight: 700;
+    color: #064e3b;
+    padding-top: 3px;
+  }
+  .timeline-title .small { font-weight: 400; color: #6b7280; font-size: 9pt; }
+  .timeline-dur {
+    font-size: 9pt;
+    color: #92400e;
+    background: #fef3c7;
+    border-radius: 10px;
+    text-align: center;
+    padding: 2px 4px;
+  }
+
+  .key-point {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border: 1px solid #10b981;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 10px 0;
+  }
+  .key-point strong { color: #064e3b; }
+
+  .demo-step {
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-left: 4px solid #0891b2;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin: 6px 0;
+  }
+  .demo-step .step-num {
+    display: inline-block;
+    width: 22px; height: 22px;
+    line-height: 22px;
+    text-align: center;
+    background: #0891b2;
+    color: white;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 9pt;
+    margin-right: 6px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ COUVERTURE ============ -->
+<div class="cover">
+  <span class="tag">Plan de présentation technique</span>
+  <h1>GaBest</h1>
+  <h2>Plateforme IA d'économie circulaire<br>et de protection environnementale</h2>
+
+  <div class="total">
+    <div><span class="num">12</span><span class="lbl">Slides</span></div>
+    <div><span class="num">30 min</span><span class="lbl">Durée totale</span></div>
+    <div><span class="num">5 min</span><span class="lbl">Démo live</span></div>
+    <div><span class="num">8</span><span class="lbl">Modèles IA</span></div>
+  </div>
+
+  <div class="bottom">
+    Structure slide-par-slide avec notes du présentateur · Timing précis · Éléments visuels suggérés<br>
+    Document généré le 19 avril 2026 — Gabès, Tunisie
+  </div>
+</div>
+
+<!-- ============ TIMELINE GÉNÉRALE ============ -->
+<div class="slide">
+  <div class="slide-header">
+    <div>
+      <span class="slide-part">Vue d'ensemble</span>
+      <h1 style="margin-bottom:0;">Timeline de la présentation</h1>
+    </div>
+    <span class="slide-duration">30 min total</span>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-time">0:00</div>
+    <div class="timeline-title">Slide 1 · Accueil &amp; pitch court<div class="small">Hook · problème · promesse</div></div>
+    <div class="timeline-dur">2 min</div>
+
+    <div class="timeline-time">0:02</div>
+    <div class="timeline-title">Slide 2 · Contexte Gabès<div class="small">Enjeux environnementaux et sanitaires</div></div>
+    <div class="timeline-dur">3 min</div>
+
+    <div class="timeline-time">0:05</div>
+    <div class="timeline-title">Slide 3 · Vision GaBest<div class="small">4 rôles · boucle d'économie circulaire</div></div>
+    <div class="timeline-dur">2 min</div>
+
+    <div class="timeline-time">0:07</div>
+    <div class="timeline-title">Slide 4 · Architecture technique<div class="small">Stack · flux de données · choix</div></div>
+    <div class="timeline-dur">4 min</div>
+
+    <div class="timeline-time">0:11</div>
+    <div class="timeline-title">Slide 5 · Fonctionnalités standard<div class="small">Dashboards · maps · temps réel</div></div>
+    <div class="timeline-dur">3 min</div>
+
+    <div class="timeline-time">0:14</div>
+    <div class="timeline-title">Slide 6 · 8 modèles IA — vue panoramique<div class="small">Tableau récapitulatif</div></div>
+    <div class="timeline-dur">2 min</div>
+
+    <div class="timeline-time">0:16</div>
+    <div class="timeline-title">Slide 7 · Zoom modèles vision &amp; graphes<div class="small">GaBest (GNN) + GabesHeal (ResNet)</div></div>
+    <div class="timeline-dur">3 min</div>
+
+    <div class="timeline-time">0:19</div>
+    <div class="timeline-title">Slide 8 · Zoom modèles XGBoost + scoring<div class="small">WaterShield · GypsiFert · BioMatch · matching</div></div>
+    <div class="timeline-dur">3 min</div>
+
+    <div class="timeline-time">0:22</div>
+    <div class="timeline-title">Slide 9 · Explicabilité (XAI)<div class="small">SHAP · Grad-CAM · Captum · Attention</div></div>
+    <div class="timeline-dur">2 min</div>
+
+    <div class="timeline-time">0:24</div>
+    <div class="timeline-title">Slide 10 · Démo live<div class="small">3 scénarios guidés</div></div>
+    <div class="timeline-dur">5 min</div>
+
+    <div class="timeline-time">0:29</div>
+    <div class="timeline-title">Slide 11 · Roadmap &amp; impact<div class="small">Prochaines étapes · scalabilité</div></div>
+    <div class="timeline-dur">2 min</div>
+
+    <div class="timeline-time">0:31</div>
+    <div class="timeline-title">Slide 12 · Q/R &amp; clôture<div class="small">Ouvrir le dialogue</div></div>
+    <div class="timeline-dur">3 min</div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 1 ============ -->
+<div class="slide">
+  <div class="slide-header">
+    <div><span class="slide-num">Slide 1</span> <span class="slide-part" style="margin-left:10px;">Partie 1 — Introduction</span></div>
+    <span class="slide-duration">⏱ 2 min</span>
+  </div>
+
+  <h1>Pitch d'ouverture</h1>
+  <p class="subtitle">Qui nous sommes et pourquoi GaBest existe</p>
+
+  <h2>Contenu à afficher</h2>
+  <ul>
+    <li><strong>Titre :</strong> GaBest — L'IA au service de la santé et de l'économie circulaire à Gabès</li>
+    <li><strong>Sous-titre :</strong> Une plateforme qui transforme la pollution en opportunité</li>
+    <li><strong>Phrase d'accroche :</strong> « Chaque année, Gabès perd des millions de dinars en déchets et paie cher le prix de sa pollution. GaBest propose une seule plateforme pour retourner cette équation. »</li>
+  </ul>
+
+  <div class="visual"><strong>Élément visuel :</strong> logo GaBest centré + photo aérienne de Gabès avec superposition semi-transparente d'un panache de pollution.</div>
+
+  <div class="speaker-notes">
+    <h3>💬 Notes du présentateur</h3>
+    <ul>
+      <li>Se présenter brièvement (nom, rôle, équipe)</li>
+      <li>Annoncer la structure : contexte → archi → démos → impact</li>
+      <li>Ne pas encore entrer dans le technique — créer l'adhésion</li>
+      <li>Astuce : commencer par une question rhétorique au public</li>
+    </ul>
+  </div>
+
+  <div class="transition"><strong>Transition →</strong> « Pour comprendre pourquoi cette plateforme a du sens, il faut d'abord parler de Gabès. »</div>
+</div>
+
+<!-- ============ SLIDE 2 ============ -->
+<div class="slide">
+  <div class="slide-header">
+    <div><span class="slide-num">Slide 2</span> <span class="slide-part" style="margin-left:10px;">Partie 1 — Introduction</span></div>
+    <span class="slide-duration">⏱ 3 min</span>
+  </div>
+
+  <h1>Contexte Gabès</h1>
+  <p class="subtitle">Un territoire sous pression environnementale</p>
+
+  <div class="two-cols">
+    <div class="col-box">
+      <h3>🏭 Enjeux industriels</h3>
+      <ul>
+        <li>Phosphates (GCT, CPG) : émissions SO₂, fluor, phosphogypse</li>
+        <li>Cimenterie + centrale thermique</li>
+        <li>Port industriel : trafic chimique</li>
+      </ul>
+    </div>
+    <div class="col-box">
+      <h3>🌱 Enjeux agricoles</h3>
+      <ul>
+        <li>Oasis menacées (salinité, eau)</li>
+        <li>Maladies cultures sous-diagnostiquées</li>
+        <li>Déchets agricoles inexploités</li>
+      </ul>
+    </div>
+    <div class="col-box">
+      <h3>🏥 Enjeux sanitaires</h3>
+      <ul>
+        <li>Pics SO₂ / PM → urgences respiratoires</li>
+        <li>Signalements dispersés, non agrégés</li>
+        <li>Pas de vision temps réel côté médecins</li>
+      </ul>
+    </div>
+    <div class="col-box">
+      <h3>♻️ Opportunités manquées</h3>
+      <ul>
+        <li>Phosphogypse stocké → pourrait amender les sols</li>
+        <li>Biomasse agricole → pourrait alimenter cimenteries</li>
+        <li>Pas de marketplace ni de matching automatisé</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="visual"><strong>Élément visuel :</strong> carte de Gabès avec pictogrammes des usines, des zones agricoles et des quartiers concernés.</div>
+
+  <div class="speaker-notes">
+    <h3>💬 Notes du présentateur</h3>
+    <ul>
+      <li>Citer 1-2 chiffres marquants si vous en avez (ex: tonnes de phosphogypse stockées, jours de pics SO₂/an)</li>
+      <li>Insister sur le fait que les 4 enjeux sont liés — ce qui justifie une plateforme unifiée</li>
+    </ul>
+  </div>
+
+  <div class="transition"><strong>Transition →</strong> « Face à ces 4 enjeux, nous avons construit une réponse unique. »</div>
+</div>
+
+<!-- ============ SLIDE 3 ============ -->
+<div class="slide">
+  <div class="slide-header">
+    <div><span class="slide-num">Slide 3</span> <span class="slide-part" style="margin-left:10px;">Partie 2 — Vision</span></div>
+    <span class="slide-duration">⏱ 2 min</span>
+  </div>
+
+  <h1>Vision GaBest</h1>
+  <p class="subtitle">Une plateforme, quatre acteurs, une boucle circulaire</p>
+
+  <div class="key-point">
+    <strong>Notre proposition de valeur :</strong> connecter <strong>agriculteurs · industriels · recycleurs · médecins</strong> dans une même plateforme, où les déchets des uns deviennent les ressources des autres, et où l'IA anticipe la pollution avant qu'elle ne fasse des victimes.
+  </div>
+
+  <h2>La boucle circulaire GaBest</h2>
+  <table>
+    <tr><th>Acteur</th><th>Reçoit</th><th>Donne</th></tr>
+    <tr><td>Agriculteur</td><td>Alertes pollution · diagnostics cultures · eau sûre · revenus nouveaux</td><td>Déchets valorisables · signalements santé</td></tr>
+    <tr><td>Industriel</td><td>Optimisation production · acheteurs pour sous-produits · ROI</td><td>Sous-produits (phosphogypse, boues, cendres…)</td></tr>
+    <tr><td>Recycleur</td><td>Flux pré-caractérisés · routage optimisé</td><td>Traitement · valorisation finale</td></tr>
+    <tr><td>Médecin</td><td>Signalements temps réel · zones IA explicables</td><td>Feedback clinique (boucle qualité)</td></tr>
+  </table>
+
+  <div class="visual"><strong>Élément visuel :</strong> schéma circulaire avec les 4 acteurs reliés par des flèches (flux physiques et flux de données).</div>
+
+  <div class="speaker-notes">
+    <h3>💬 Notes du présentateur</h3>
+    <ul>
+      <li>Insister sur « <em>une plateforme, pas quatre applications</em> »</li>
+      <li>Le mot-clé à retenir : <strong>symbiose industrielle</strong></li>
+    </ul>
+  </div>
+
+  <div class="transition"><strong>Transition →</strong> « Voyons comment cette vision se traduit techniquement. »</div>
+</div>
+
+<!-- ============ SLIDE 4 ============ -->
+<div class="slide">
+  <div class="slide-header">
+    <div><span class="slide-num">Slide 4</span> <span class="slide-part" style="margin-left:10px;">Partie 3 — Architecture</span></div>
+    <span class="slide-duration">⏱ 4 min</span>
+  </div>
+
+  <h1>Architecture technique</h1>
+  <p class="subtitle">Stack moderne, explicabilité intégrée, déploiement léger</p>
+
+  <h2>Schéma 3-tiers</h2>
+  <div class="visual">
+    <strong>À afficher :</strong> diagramme horizontal<br>
+    <code>[React + Vite + Tailwind]</code> ⇄ <code>[FastAPI + PyTorch/XGBoost]</code> ⇄ <code>[Supabase PostgreSQL + Realtime]</code> ⇄ <code>[OpenWeatherMap API]</code>
+  </div>
+
+  <h2>Stack technique</h2>
+  <table>
+    <tr><th>Couche</th><th>Technologies</th><th>Pourquoi</th></tr>
+    <tr>
+      <td><strong>Frontend</strong></td>
+      <td>React 18 · Vite 6 · TypeScript · Tailwind 4 · Radix UI · MUI · Recharts · Leaflet</td>
+      <td>DX rapide, composants accessibles, design system cohérent</td>
+    </tr>
+    <tr>
+      <td><strong>Backend</strong></td>
+      <td>FastAPI · PyTorch · TorchGeometric · scikit-learn · XGBoost · SHAP · Captum</td>
+      <td>Async, typing Pydantic, OpenAPI auto, écosystème IA mature</td>
+    </tr>
+    <tr>
+      <td><strong>Base</strong></td>
+      <td>Supabase (PostgreSQL + Realtime + RLS)</td>
+      <td>Realtime WebSocket out-of-the-box, sécurité granulaire</td>
+    </tr>
+    <tr>
+      <td><strong>Externe</strong></td>
+      <td>OpenWeatherMap (air pollution + météo)</td>
+      <td>Données fiables, couverture mondiale, gratuit</td>
+    </tr>
+  </table>
+
+  <div class="speaker-notes">
+    <h3>💬 Notes du présentateur</h3>
+    <ul>
+      <li>Insister sur le fait que <strong>les modèles tournent sur CPU</strong> (pas besoin de GPU en prod)</li>
+      <li>Mentionner le <em>lifespan loader</em> de FastAPI qui charge tous les modèles au démarrage (pas de cold start)</li>
+      <li>Si question sur le choix de Supabase vs Firebase : Realtime + SQL + RLS</li>
+    </ul>
+  </div>
+
+  <div class="transition"><strong>Transition →</strong> « Cette architecture permet des expériences utilisateur différenciées selon les rôles. »</div>
+</div>
+
+<!-- ============ SLIDE 5 ============ -->
+<div class="slide">
+  <div class="slide-header">
+    <div><span class="slide-num">Slide 5</span> <span class="slide-part" style="margin-left:10px;">Partie 4 — Fonctionnalités standard</span></div>
+    <span class="slide-duration">⏱ 3 min</span>
+  </div>
+
+  <h1>Fonctionnalités standard</h1>
+  <p class="subtitle">Ce qui existe avant même de parler d'IA</p>
+
+  <div class="two-cols">
+    <div class="col-box">
+      <h3>🔐 Auth &amp; onboarding</h3>
+      <ul>
+        <li>Sélection rôle (4 personas)</li>
+        <li>Formulaire profil agro-éco</li>
+        <li>Redirection dashboard</li>
+      </ul>
+    </div>
+    <div class="col-box">
+      <h3>📊 Dashboards rôle-spécifiques</h3>
+      <ul>
+        <li>DashboardShell réutilisable</li>
+        <li>StickyPillNav + MetricCard</li>
+        <li>Thème clair/sombre</li>
+      </ul>
+    </div>
+    <div class="col-box">
+      <h3>🗺️ Cartes &amp; visualisation</h3>
+      <ul>
+        <li>Leaflet + React-Leaflet</li>
+        <li>Panaches de dispersion</li>
+        <li>Recharts (séries temporelles)</li>
+      </ul>
+    </div>
+    <div class="col-box">
+      <h3>⚡ Temps réel</h3>
+      <ul>
+        <li>Supabase Realtime (WebSocket)</li>
+        <li>OpenWeatherMap polling</li>
+        <li>Toasts &amp; notifications</li>
+      </ul>
+    </div>
+    <div class="col-box">
+      <h3>📈 Reporting</h3>
+      <ul>
+        <li>Bilans économiques mensuels</li>
+        <li>Export HTML de dashboards</li>
+        <li>ROI jour-par-jour</li>
+      </ul>
+    </div>
+    <div class="col-box">
+      <h3>🎨 UX</h3>
+      <ul>
+        <li>29 primitives Radix</li>
+        <li>487 icônes Lucide</li>
+        <li>Motion (Framer alt.)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="visual"><strong>Élément visuel :</strong> mosaïque de 4 captures d'écran (1 par dashboard rôle).</div>
+
+  <div class="speaker-notes">
+    <h3>💬 Notes du présentateur</h3>
+    <ul>
+      <li>Ne pas passer trop de temps ici — c'est l'IA qui différencie</li>
+      <li>Mais insister sur la qualité du design system → confiance du public</li>
+    </ul>
+  </div>
+
+  <div class="transition"><strong>Transition →</strong> « Passons maintenant au cœur différenciant de la plateforme : les 8 modèles IA. »</div>
+</div>
+
+<!-- ============ SLIDE 6 ============ -->
+<div class="slide">
+  <div class="slide-header">
+    <div><span class="slide-num">Slide 6</span> <span class="slide-part" style="margin-left:10px;">Partie 5 — IA panoramique</span></div>
+    <span class="slide-duration">⏱ 2 min</span>
+  </div>
+
+  <h1>Les 8 modèles IA de GaBest</h1>
+  <p class="subtitle">Vue panoramique — une IA par besoin métier</p>
+
+  <table>
+    <tr><th>#</th><th>Module</th><th>Stack</th><th>Utilisateur</th><th>Rôle</th></tr>
+    <tr><td>1</td><td><strong>GaBest</strong></td><td>GNN + LSTM</td><td>Médecin / Autorité</td><td>Zones critiques pollution (4 niveaux)</td></tr>
+    <tr><td>2</td><td><strong>GabesHeal F2</strong></td><td>ResNet-50</td><td>Agriculteur</td><td>Diagnostic maladies cultures (38 classes)</td></tr>
+    <tr><td>3</td><td><strong>WindShield</strong></td><td>Random Forest + éco</td><td>Industriel</td><td>Ajustement production selon vent</td></tr>
+    <tr><td>4</td><td><strong>GypsiFert</strong></td><td>3× XGBoost</td><td>Agriculteur / Industriel</td><td>Dosage phosphogypse en amendement</td></tr>
+    <tr><td>5</td><td><strong>BioMatch</strong></td><td>XGBoost</td><td>Agriculteur</td><td>Valorisation énergétique déchets</td></tr>
+    <tr><td>6</td><td><strong>WaterShield</strong></td><td>6× XGBoost</td><td>Agriculteur</td><td>Qualité eau irrigation</td></tr>
+    <tr><td>7</td><td><strong>PhosphoMatch</strong></td><td>Scoring contraint</td><td>Industriel</td><td>Matching lots phosphogypse</td></tr>
+    <tr><td>8</td><td><strong>IndustryMatch</strong></td><td>Scoring + SHAP</td><td>Industriel / Recycleur</td><td>Routage déchets → acheteurs</td></tr>
+  </table>
+
+  <div class="key-point">
+    <strong>Point différenciant :</strong> diversité des approches (GNN + CNN + RF + XGBoost + scoring), explicabilité systématique (SHAP, Grad-CAM, Captum, attention GAT), et déploiement CPU-only.
+  </div>
+
+  <div class="speaker-notes">
+    <h3>💬 Notes du présentateur</h3>
+    <ul>
+      <li>Ne pas lire le tableau — laisser le public le scanner</li>
+      <li>Annoncer : « Je vais zoomer sur 4 modèles emblématiques »</li>
+    </ul>
+  </div>
+
+  <div class="transition"><strong>Transition →</strong> « Commençons par les modèles de vision et de graphes. »</div>
+</div>
+
+<!-- ============ SLIDE 7 ============ -->
+<div class="slide">
+  <div class="slide-header">
+    <div><span class="slide-num">Slide 7</span> <span class="slide-part" style="margin-left:10px;">Partie 5 — Zoom IA</span></div>
+    <span class="slide-duration">⏱ 3 min</span>
+  </div>
+
+  <h1>Zoom : GaBest &amp; GabesHeal F2</h1>
+  <p class="subtitle">Graph Neural Network et Vision Deep Learning</p>
+
+  <h2>🧠 GaBest — Prédiction des zones critiques</h2>
+  <p><span class="badge tech">GNN (GAT) + LSTM</span><span class="badge tech">PyTorch Geometric</span><span class="badge xai">XAI : Attention + SHAP + Captum</span></p>
+  <ul>
+    <li><strong>Entrée :</strong> 8 quartiers × 7 jours historiques (SO₂, PM2.5, PM10, NO₂, vent, humidité, signalements)</li>
+    <li><strong>Sortie :</strong> 4 classes par quartier (Normal · Vigilance · Critique · Urgence) + confiance</li>
+    <li><strong>Intelligence graphe :</strong> l'attention GAT apprend quels quartiers voisins influencent le plus chaque zone</li>
+    <li><strong>Artefact :</strong> <code>gabest_best.pt</code> (989 KB) · Dataset 2023-2024</li>
+  </ul>
+
+  <h2>🌿 GabesHeal F2 — Diagnostic maladies cultures</h2>
+  <p><span class="badge tech">ResNet-50 fine-tuné</span><span class="badge xai">XAI : Grad-CAM</span></p>
+  <ul>
+    <li><strong>Entrée :</strong> photo de feuille (JPEG, 224×224)</li>
+    <li><strong>Sortie :</strong> maladie + plante (FR) + top-3 + sévérité + <strong>traitement avec produit, dosage et prix en TND</strong></li>
+    <li><strong>Classes :</strong> 38 (PlantVillage : pomme, maïs, vigne, tomate, pomme de terre…)</li>
+    <li><strong>Artefact :</strong> <code>gabeseal_f2_model.pth</code> (98.6 MB)</li>
+  </ul>
+
+  <div class="visual"><strong>Élément visuel :</strong> deux captures côte à côte — (1) graphe Gabès avec poids d'attention visibles, (2) photo feuille avec overlay Grad-CAM rouge-chaud sur la zone malade.</div>
+
+  <div class="speaker-notes">
+    <h3>💬 Notes du présentateur</h3>
+    <ul>
+      <li>Insister : le modèle ne dit pas seulement « malade » — il dit <em>où, quoi, avec quoi la traiter, et combien ça coûte en DT</em></li>
+      <li>Pour GaBest : expliquer que le graphe capture la proximité spatiale ET l'influence du vent</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============ SLIDE 8 ============ -->
+<div class="slide">
+  <div class="slide-header">
+    <div><span class="slide-num">Slide 8</span> <span class="slide-part" style="margin-left:10px;">Partie 5 — Zoom IA</span></div>
+    <span class="slide-duration">⏱ 3 min</span>
+  </div>
+
+  <h1>Zoom : XGBoost &amp; matching</h1>
+  <p class="subtitle">Prédictions tabulaires + algorithmes de recommandation</p>
+
+  <h2>💧 WaterShield — Eau d'irrigation</h2>
+  <p><span class="badge tech">6× XGBoost</span></p>
+  <ul>
+    <li><strong>Entrée :</strong> source eau · distance GCT · indices visuels · pluviométrie · saison</li>
+    <li><strong>Sortie :</strong> score 0–100 · bande (sûre → critique) · 4 probas contaminants · cultures compatibles · reco</li>
+  </ul>
+
+  <h2>🌱 GypsiFert — Dosage phosphogypse</h2>
+  <p><span class="badge tech">3× XGBoost</span><span class="badge xai">SHAP</span></p>
+  <ul>
+    <li><strong>Entrée :</strong> pH · Ca · Mg · CEC · Cd · Pb · pluviométrie · type sol · culture · surface</li>
+    <li><strong>Sortie :</strong> dosage optimal (t/ha) + gain rendement (%) + score contamination + SHAP</li>
+  </ul>
+
+  <h2>♻️ BioMatch — Valorisation énergétique</h2>
+  <p><span class="badge tech">XGBoost</span><span class="badge eco">Matching 7 usines + 5 recycleurs</span></p>
+  <ul>
+    <li><strong>Entrée :</strong> type déchet (10) · quantité · humidité</li>
+    <li><strong>Sortie :</strong> HHV · énergie (MWh) · qualité · valeur marché (DT) + acheteurs compatibles</li>
+  </ul>
+
+  <h2>🏭 PhosphoMatch &amp; IndustryMatch</h2>
+  <p><span class="badge tech">Scoring contraint</span><span class="badge xai">SHAP (agronomique)</span></p>
+  <ul>
+    <li>Matching des lots industriels avec acheteurs selon contraintes (pureté, métaux lourds, radioactivité)</li>
+    <li>Calcul CO₂ évité + revenu + distance</li>
+  </ul>
+
+  <div class="speaker-notes">
+    <h3>💬 Notes du présentateur</h3>
+    <ul>
+      <li>Montrer que XGBoost n'est pas du « simple ML » : 6 modèles orchestrés = sortie riche</li>
+      <li>Faire le lien : les sorties agronomiques de GypsiFert alimentent IndustryMatch (SHAP partagé)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============ SLIDE 9 ============ -->
+<div class="slide">
+  <div class="slide-header">
+    <div><span class="slide-num">Slide 9</span> <span class="slide-part" style="margin-left:10px;">Partie 5 — IA</span></div>
+    <span class="slide-duration">⏱ 2 min</span>
+  </div>
+
+  <h1>Explicabilité (XAI)</h1>
+  <p class="subtitle">Aucun modèle sans explication</p>
+
+  <div class="key-point">
+    <strong>Principe GaBest :</strong> chaque prédiction s'accompagne d'une justification compréhensible. L'utilisateur — médecin, agriculteur, industriel — voit <em>pourquoi</em> l'IA recommande telle action.
+  </div>
+
+  <table>
+    <tr><th>Technique XAI</th><th>Utilisée pour</th><th>Ce qu'elle montre</th></tr>
+    <tr><td><strong>SHAP (Kernel)</strong></td><td>GaBest, GypsiFert, IndustryMatch</td><td>Contribution de chaque variable à la prédiction</td></tr>
+    <tr><td><strong>Grad-CAM</strong></td><td>GabesHeal F2</td><td>Carte de chaleur sur la photo : où l'IA a « regardé »</td></tr>
+    <tr><td><strong>Captum Integrated Gradients</strong></td><td>GaBest</td><td>Attribution temporelle : quel jour influence le plus la prédiction</td></tr>
+    <tr><td><strong>Attention GAT</strong></td><td>GaBest</td><td>Poids d'influence entre quartiers voisins</td></tr>
+    <tr><td><strong>Feature importance XGBoost</strong></td><td>WaterShield, BioMatch</td><td>Variables dominantes dans le scoring</td></tr>
+  </table>
+
+  <div class="speaker-notes">
+    <h3>💬 Notes du présentateur</h3>
+    <ul>
+      <li>C'est un <strong>argument fort pour un jury ou un régulateur</strong> : IA de confiance = IA explicable</li>
+      <li>Si question « boîte noire » : rappeler qu'aucun modèle n'est opaque ici</li>
+    </ul>
+  </div>
+
+  <div class="transition"><strong>Transition →</strong> « Maintenant que vous avez la théorie, passons à la pratique. »</div>
+</div>
+
+<!-- ============ SLIDE 10 ============ -->
+<div class="slide">
+  <div class="slide-header">
+    <div><span class="slide-num">Slide 10</span> <span class="slide-part" style="margin-left:10px;">Partie 6 — Démo live</span></div>
+    <span class="slide-duration">⏱ 5 min</span>
+  </div>
+
+  <h1>Démo live</h1>
+  <p class="subtitle">Trois scénarios en 5 minutes</p>
+
+  <h2>🚀 Lancement (à pré-lancer avant la présentation)</h2>
+  <div class="demo-step">
+    <span class="step-num">0</span>
+    <strong>Pré-requis :</strong> <code>cd backend &amp;&amp; source .venv/bin/activate &amp;&amp; python main.py</code> (port 8000) <br>
+    + <code>npm run dev</code> (port 5173) — à lancer en arrière-plan.
+  </div>
+
+  <h2>Scénario 1 — Agriculteur (1 min 30)</h2>
+  <div class="demo-step"><span class="step-num">1</span>Login agriculteur → ouvrir <strong>CropDiag</strong></div>
+  <div class="demo-step"><span class="step-num">2</span>Upload photo feuille malade (préparer fichier à l'avance)</div>
+  <div class="demo-step"><span class="step-num">3</span>Montrer diagnostic + Grad-CAM + traitement recommandé en DT</div>
+
+  <h2>Scénario 2 — Médecin (2 min)</h2>
+  <div class="demo-step"><span class="step-num">1</span>Switch dashboard médecin → <strong>GaBest · Zones IA</strong></div>
+  <div class="demo-step"><span class="step-num">2</span>Sélectionner date <code>2024-06-15</code> (distribution mixte intéressante)</div>
+  <div class="demo-step"><span class="step-num">3</span>Cliquer un quartier → montrer SHAP + attention GAT</div>
+  <div class="demo-step"><span class="step-num">4</span>Bonus : insérer un signalement patient dans Supabase → voir la mise à jour Realtime</div>
+
+  <h2>Scénario 3 — Industriel (1 min 30)</h2>
+  <div class="demo-step"><span class="step-num">1</span>Switch dashboard industriel → <strong>WindShield</strong></div>
+  <div class="demo-step"><span class="step-num">2</span>Montrer carte panache + ajustement production recommandé</div>
+  <div class="demo-step"><span class="step-num">3</span>Ouvrir <strong>rapport mensuel</strong> → bilan économique jour-par-jour</div>
+
+  <div class="speaker-notes">
+    <h3>💬 Notes du présentateur</h3>
+    <ul>
+      <li><strong>Plan B :</strong> si le backend plante, avoir une vidéo de secours de 3 min pré-enregistrée</li>
+      <li>Pendant la démo, ne pas parler du code — parler de l'expérience utilisateur</li>
+      <li>Garder un rythme : chronométrer la répétition 2× avant le jour J</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============ SLIDE 11 ============ -->
+<div class="slide">
+  <div class="slide-header">
+    <div><span class="slide-num">Slide 11</span> <span class="slide-part" style="margin-left:10px;">Partie 7 — Roadmap</span></div>
+    <span class="slide-duration">⏱ 2 min</span>
+  </div>
+
+  <h1>Roadmap &amp; impact</h1>
+  <p class="subtitle">Où on va, et pourquoi ça compte</p>
+
+  <h2>🛠️ Roadmap technique</h2>
+  <ul>
+    <li><strong>Court terme (3 mois) :</strong> PWA mobile · intégration capteurs IoT temps réel · intégration LLM OpenAI (déjà en <code>.env.local</code>) pour conseils conversationnels</li>
+    <li><strong>Moyen terme (6-12 mois) :</strong> containerisation Docker · CI/CD · multi-tenant (extension à d'autres gouvernorats : Sfax, Tunis, Bizerte)</li>
+    <li><strong>Long terme :</strong> modèles fédérés par région · marketplace monétisée · API publique pour autorités</li>
+  </ul>
+
+  <h2>📈 Impact attendu</h2>
+  <div class="two-cols">
+    <div class="col-box">
+      <h3>Impact environnemental</h3>
+      <ul>
+        <li>Réduction des émissions par ajustement production</li>
+        <li>Valorisation déchets → moins de décharges</li>
+        <li>CO₂ évité mesurable par tournée</li>
+      </ul>
+    </div>
+    <div class="col-box">
+      <h3>Impact économique</h3>
+      <ul>
+        <li>Revenus nouveaux pour agriculteurs (BioMatch)</li>
+        <li>Amendes ANPE évitées pour industriels</li>
+        <li>Crédits carbone + coûts santé évités</li>
+      </ul>
+    </div>
+    <div class="col-box">
+      <h3>Impact sanitaire</h3>
+      <ul>
+        <li>Alertes 48 h à l'avance sur pics pollution</li>
+        <li>Signalements agrégés pour santé publique</li>
+        <li>Cultures plus sûres via WaterShield</li>
+      </ul>
+    </div>
+    <div class="col-box">
+      <h3>Impact social</h3>
+      <ul>
+        <li>Transparence pour les citoyens</li>
+        <li>Boucle de confiance médecins-autorités</li>
+        <li>Modèle réplicable à l'échelle nationale</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="speaker-notes">
+    <h3>💬 Notes du présentateur</h3>
+    <ul>
+      <li>Faire rêver mais rester crédible — toujours parler de <em>mesurable</em></li>
+      <li>Si public institutionnel : mettre l'accent sur la scalabilité nationale</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============ SLIDE 12 ============ -->
+<div class="slide">
+  <div class="slide-header">
+    <div><span class="slide-num">Slide 12</span> <span class="slide-part" style="margin-left:10px;">Partie 8 — Clôture</span></div>
+    <span class="slide-duration">⏱ 3 min</span>
+  </div>
+
+  <h1>Questions &amp; ouverture</h1>
+  <p class="subtitle">Préparer les questions fréquentes</p>
+
+  <h2>❓ FAQ anticipée</h2>
+  <table>
+    <tr><th>Question probable</th><th>Réponse courte à maîtriser</th></tr>
+    <tr><td>« Comment garantir la fiabilité des modèles ? »</td><td>Métriques de validation croisée + explicabilité systématique (SHAP/Grad-CAM) + boucle de feedback</td></tr>
+    <tr><td>« Qui valide les données capteurs ? »</td><td>Actuellement OpenWeatherMap + dataset Gabès 2023-2024 ; en prod : capteurs IoT certifiés</td></tr>
+    <tr><td>« Quel coût d'infrastructure ? »</td><td>Backend CPU-only + Supabase (tier gratuit possible) → scalable à faible coût</td></tr>
+    <tr><td>« Comment passer du POC à la prod ? »</td><td>Containerisation Docker + CI/CD + multi-tenant → déjà prévu dans la roadmap</td></tr>
+    <tr><td>« Partenariats prévus ? »</td><td>ANPE, GCT, ministère de l'environnement, gouvernorat de Gabès (à discuter)</td></tr>
+    <tr><td>« Données personnelles (patients) ? »</td><td>RLS Supabase + anonymisation + consentement explicite côté médecin</td></tr>
+  </table>
+
+  <h2>📬 Call-to-action</h2>
+  <ul>
+    <li>Ouvrir au dialogue : <em>« Quel acteur de l'écosystème Gabès voudriez-vous voir intégrer GaBest en premier ? »</em></li>
+    <li>Laisser coordonnées + lien dépôt du projet</li>
+    <li>Inviter à tester la démo après la session</li>
+  </ul>
+
+  <div class="key-point" style="text-align:center; font-size:13pt; padding:20px;">
+    <strong>Message final :</strong><br>
+    « GaBest ne prétend pas dépolluer Gabès, mais rendre visible, explicable et actionnable chaque décision qui compte — pour tous les acteurs du territoire. »
+  </div>
+
+  <div class="speaker-notes">
+    <h3>💬 Notes du présentateur</h3>
+    <ul>
+      <li>Ne pas stresser les 3 minutes — c'est le moment où le public s'engage</li>
+      <li>Remercier clairement, même si peu de questions</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CPG/GCT Gabes — Pollution Monitor</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:     #0d1117;
+  --card:   #161b22;
+  --card2:  #1c2128;
+  --line:   #21262d;
+  --text:   #e6edf3;
+  --muted:  #7d8590;
+  --green:  #3fb950;
+  --yellow: #d29922;
+  --orange: #db6d28;
+  --red:    #f85149;
+  --blue:   #58a6ff;
+  --purple: #a371f7;
+  --teal:   #2dd4bf;
+  --border: #30363d;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; }
+
+/* ─── TOPBAR ─── */
+.topbar {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 900;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand h1 { font-size: 14px; font-weight: 600; letter-spacing: -.01em; }
+.brand p  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; margin-right: 5px; vertical-align: middle; }
+.dot.off { background: var(--red); animation: none; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+.keys { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.keys input {
+  background: var(--card2); border: 1px solid var(--border);
+  color: var(--text); border-radius: 8px;
+  padding: 7px 12px; font-size: 12px; width: 205px; outline: none;
+}
+.keys input:focus { border-color: var(--purple); }
+.keys input::placeholder { color: var(--muted); }
+.btn { padding: 7px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); transition: opacity .15s; }
+.btn-p { background: var(--purple); color: #0d1117; border-color: var(--purple); }
+.btn-s { background: var(--card2); color: var(--text); }
+.btn:hover { opacity: .82; }
+
+/* ─── ALERT ─── */
+.alert {
+  display: none; margin: 0; padding: 12px 24px;
+  align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 600;
+}
+.alert.on { display: flex; }
+.alert.danger { background: #3d0000; border-bottom: 1px solid var(--red); color: #fca5a5; }
+.alert.warning { background: #2e1900; border-bottom: 1px solid var(--yellow); color: #fcd34d; }
+
+/* ─── PAGE WRAPPER ─── */
+.page { max-width: 1200px; margin: 0 auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; }
+
+/* ─── SECTION TITLE ─── */
+.sec-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.sec-title::after { content:''; flex:1; height:1px; background:var(--line); }
+
+/* ─── METRIC STRIP ─── */
+.metric-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.mcard {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px 18px;
+  display: flex; flex-direction: column; gap: 6px;
+  transition: border-color .4s;
+}
+.mcard.danger-glow { border-color: var(--red); box-shadow: 0 0 0 1px #f8514920; }
+.mcard .mlabel { font-size: 11px; color: var(--muted); }
+.mcard .mval { font-size: 28px; font-weight: 700; line-height: 1; letter-spacing: -.02em; transition: color .5s; }
+.mcard .msub { font-size: 11px; color: var(--muted); }
+.mcard .mtag { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-top: 2px; }
+.cg { color: var(--green); } .cy { color: var(--yellow); }
+.co { color: var(--orange); } .cr { color: var(--red); }
+.cb { color: var(--blue); }  .cp { color: var(--purple); }
+
+/* ─── LIVE CHART ─── */
+.live-wrap {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px 24px;
+}
+.live-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+.live-head h2 { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+.live-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 10px; font-weight: 700;
+}
+.live-pill.green { background: #0d2e16; color: var(--green); }
+.live-pill.red   { background: #2d0c09; color: var(--red); animation: pulse .8s infinite; }
+.live-pill.yellow{ background: #2e1900; color: var(--yellow); }
+.live-pill::before { content: '●'; font-size: 8px; }
+.live-ctrl { display: flex; gap: 12px; align-items: center; font-size: 11px; color: var(--muted); }
+.live-ctrl select { background: var(--card2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 4px 8px; font-size: 11px; }
+.chart-box { height: 200px; position: relative; }
+.live-legend { display: flex; gap: 18px; margin-top: 12px; flex-wrap: wrap; }
+.ll { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+.ll-line { width: 20px; height: 2px; border-radius: 2px; }
+
+/* ─── TWO-COL LAYOUT ─── */
+.two-col { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+
+/* ─── MAP ─── */
+.map-wrap {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden; position: relative;
+}
+.map-topbar { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 600; }
+#map { height: 420px; }
+
+/* Leaflet popup dark */
+.leaflet-popup-content-wrapper { background: #1c2128; color: #e6edf3; border: 1px solid #30363d; border-radius: 10px; box-shadow: 0 8px 30px #00000088; }
+.leaflet-popup-tip { background: #1c2128; }
+.leaflet-popup-content { font-size: 12px; line-height: 1.65; margin: 10px 14px; }
+.pt { font-size: 13px; font-weight: 700; color: #58a6ff; padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid #30363d; }
+.pr { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; color: #7d8590; }
+.pr b { color: #e6edf3; }
+
+/* Map overlays */
+.map-leg {
+  position: absolute; top: 52px; right: 8px; z-index: 800;
+  background: rgba(13,17,23,.94); border: 1px solid #30363d;
+  border-radius: 10px; padding: 10px 12px; font-size: 11px;
+  min-width: 170px; backdrop-filter: blur(8px);
+}
+.map-leg h4 { font-size: 10px; font-weight: 700; color: var(--blue); margin-bottom: 7px; text-transform: uppercase; letter-spacing: .05em; }
+.ml-row { display: flex; align-items: center; gap: 7px; margin: 4px 0; color: var(--text); }
+.ml-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.ml-line { width: 18px; height: 3px; border-radius: 2px; flex-shrink: 0; }
+.map-leg hr { border: none; border-top: 1px solid var(--line); margin: 7px 0; }
+.map-wx {
+  position: absolute; bottom: 24px; left: 8px; z-index: 800;
+  background: rgba(13,17,23,.94); border: 1px solid #30363d;
+  border-radius: 10px; padding: 10px 13px; font-size: 11px;
+  backdrop-filter: blur(8px); min-width: 160px;
+}
+.map-wx strong { color: var(--blue); display: block; margin-bottom: 5px; font-size: 12px; }
+
+/* ─── SIDE PANEL ─── */
+.side { display: flex; flex-direction: column; gap: 16px; }
+
+/* Compass card */
+.compass-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px;
+}
+.compass-inner { display: flex; align-items: center; gap: 14px; }
+#cmp { width: 90px; height: 90px; flex-shrink: 0; }
+.cmp-data { display: flex; flex-direction: column; gap: 5px; }
+.cmp-val { font-size: 26px; font-weight: 700; line-height: 1; }
+.cmp-sub { font-size: 11px; color: var(--muted); }
+.cmp-tag { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; margin-top: 4px; }
+.tag-ok   { background: #0d2e16; color: var(--green); }
+.tag-warn { background: #2d0c09; color: var(--red); }
+
+/* 24h planning */
+.plan-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px;
+}
+.bar-grid { display: grid; grid-template-columns: repeat(12,1fr); gap: 3px; align-items: flex-end; height: 52px; margin-bottom: 4px; }
+.hbar { border-radius: 3px 3px 0 0; cursor: pointer; min-height: 4px; transition: opacity .15s; }
+.hbar:hover { opacity: .7; }
+.hbar.now { outline: 2px solid rgba(255,255,255,.6); outline-offset: 1px; }
+.lbl-grid { display: grid; grid-template-columns: repeat(12,1fr); gap: 3px; }
+.lbl-grid span { font-size: 7.5px; color: var(--muted); text-align: center; }
+
+/* Recs card */
+.recs-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px; flex: 1;
+}
+.rec-item { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); align-items: flex-start; }
+.rec-item:last-child { border-bottom: none; }
+.rec-num { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+.rn-g { background: #0d2e16; color: var(--green); }
+.rn-y { background: #2e1900; color: var(--yellow); }
+.rn-o { background: #2e1100; color: var(--orange); }
+.rn-r { background: #2d0c09; color: var(--red); }
+.rec-body .rt  { font-size: 12px; font-weight: 500; color: var(--text); line-height: 1.4; }
+.rec-body .rs  { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+/* ─── PRODUCTS ─── */
+.products-wrap {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px 24px;
+}
+.prod-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+.prod-card {
+  background: var(--card2); border-radius: 10px;
+  padding: 14px 16px; border-left: 3px solid var(--border);
+  transition: border-color .4s;
+}
+.prod-card.stop    { border-left-color: var(--red); }
+.prod-card.reduce  { border-left-color: var(--orange); }
+.prod-card.ok      { border-left-color: var(--green); }
+.prod-card.boost   { border-left-color: var(--blue); }
+.prod-name { font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+.prod-pct-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
+.prod-pct { font-size: 28px; font-weight: 700; line-height: 1; }
+.prod-delta { font-size: 12px; font-weight: 600; }
+.prod-bar-bg { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-bottom: 8px; }
+.prod-bar-fg { height: 100%; border-radius: 3px; transition: width 1.5s ease; }
+.prod-action { font-size: 11px; color: var(--muted); line-height: 1.5; }
+.prod-smoke  { font-size: 11px; color: var(--teal); margin-top: 4px; }
+
+/* ─── BILAN MENSUEL ─── */
+.bilan-wrap {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+}
+.bilan-top { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.bilan-top h2 { font-size: 14px; font-weight: 600; }
+.bilan-top-right { display: flex; gap: 8px; align-items: center; }
+.bilan-top select { background: var(--card2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 6px 10px; font-size: 12px; }
+
+/* KPI row */
+.bilan-kpis { display: grid; grid-template-columns: repeat(4,1fr); border-bottom: 1px solid var(--border); }
+.bkpi { padding: 16px 20px; border-right: 1px solid var(--border); }
+.bkpi:last-child { border-right: none; }
+.bkpi-val { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+.bkpi-lbl { font-size: 11px; color: var(--muted); }
+.bkpi-tag { font-size: 11px; font-weight: 600; margin-top: 3px; }
+.tag-up   { color: var(--green); }
+.tag-dn   { color: var(--red); }
+.tag-eq   { color: var(--muted); }
+
+/* Bilan body: 3 cols */
+.bilan-body { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+.bc { padding: 20px; border-right: 1px solid var(--border); }
+.bc:last-child { border-right: none; }
+.bc-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 14px; }
+
+/* Heatmap */
+.hm-wrap { }
+.hm-days { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-bottom: 4px; }
+.hm-days span { font-size: 8px; color: var(--muted); text-align: center; }
+.hm-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+.hm-cell { height: 24px; border-radius: 4px; cursor: pointer; transition: opacity .15s; position: relative; }
+.hm-cell:hover { opacity: .75; }
+.hm-cell:hover::after { content: attr(data-tip); position: absolute; top: -30px; left: 50%; transform: translateX(-50%); background: #1c2128; color: #e6edf3; font-size: 9px; padding: 3px 7px; border-radius: 5px; white-space: nowrap; z-index: 10; border: 1px solid #30363d; pointer-events: none; }
+
+/* Product monthly bars */
+.pm-item { margin-bottom: 12px; }
+.pm-hdr { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; }
+.pm-hdr span { color: var(--muted); }
+.pm-hdr b { color: var(--text); }
+.pm-bg { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+.pm-fg { height: 100%; border-radius: 4px; transition: width .8s ease; }
+
+/* AI output */
+.bilan-ai {
+  font-size: 12px; line-height: 1.8; color: var(--text);
+  max-height: 360px; overflow-y: auto; white-space: pre-wrap;
+}
+.bilan-ai::-webkit-scrollbar { width: 4px; }
+.bilan-ai::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.spinner-wrap { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+.spin { width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--purple); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── RAPPORT ─── */
+.rapport-wrap {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px 24px;
+}
+.rapport-out {
+  background: var(--card2); border-radius: 10px; padding: 14px;
+  font-size: 12px; line-height: 1.8; color: var(--text);
+  min-height: 80px; max-height: 220px; overflow-y: auto;
+  white-space: pre-wrap; margin-bottom: 12px;
+}
+.rapport-out::-webkit-scrollbar { width: 4px; }
+.rapport-out::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.rapport-row { display: flex; gap: 8px; }
+.rapport-row input {
+  flex: 1; background: var(--card2); border: 1px solid var(--border);
+  color: var(--text); border-radius: 8px; padding: 8px 12px; font-size: 12px; outline: none;
+}
+.rapport-row input:focus { border-color: var(--purple); }
+.rapport-row input::placeholder { color: var(--muted); }
+
+@media (max-width: 900px) {
+  .metric-strip { grid-template-columns: repeat(3,1fr); }
+  .two-col { grid-template-columns: 1fr; }
+  .prod-grid { grid-template-columns: repeat(2,1fr); }
+  .bilan-kpis { grid-template-columns: repeat(2,1fr); }
+  .bilan-body { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">
+    <span style="font-size:22px">🏭</span>
+    <div>
+      <h1>Pollution Monitor · CPG/GCT Gabes</h1>
+      <p><span class="dot off" id="sdot"></span><span id="stxt">En attente...</span></p>
+    </div>
+  </div>
+  <div class="keys">
+    <input id="owm" type="password" placeholder="🌤 OpenWeatherMap Key"/>
+    <input id="oai" type="password" placeholder="🤖 OpenAI Key"/>
+    <button class="btn btn-p" onclick="startDash()">▶ Démarrer</button>
+    <button class="btn btn-s" onclick="runDemo()">📊 Démo</button>
+  </div>
+</div>
+
+<!-- ALERT -->
+<div class="alert" id="abar">
+  <span id="aico">⚠️</span>
+  <span id="atxt"></span>
+</div>
+
+<div class="page">
+
+  <!-- ① METRICS -->
+  <div>
+    <div class="sec-title">Indicateurs temps réel</div>
+    <div class="metric-strip">
+      <div class="mcard" id="mc0">
+        <div class="mlabel">💨 Vent</div>
+        <div class="mval cg" id="m-wind">—</div>
+        <div class="msub" id="m-wind-s">km/h</div>
+        <div class="mtag" id="m-wind-dir" style="background:#1c2128;color:var(--blue)">—</div>
+      </div>
+      <div class="mcard" id="mc1">
+        <div class="mlabel">🏭 Production recommandée</div>
+        <div class="mval" id="m-prod">—</div>
+        <div class="msub">capacité usine</div>
+        <div class="mtag" id="m-prod-tag" style="background:#0d2e16;color:var(--green)">OPTIMAL</div>
+      </div>
+      <div class="mcard" id="mc2">
+        <div class="mlabel">☣️ Risque pollution ville</div>
+        <div class="mval" id="m-risk">—</div>
+        <div class="msub">score / 100</div>
+      </div>
+      <div class="mcard">
+        <div class="mlabel">🌡️ Météo</div>
+        <div class="mval" id="m-temp">—</div>
+        <div class="msub" id="m-temp-s">—</div>
+      </div>
+      <div class="mcard">
+        <div class="mlabel">💚 Pollution évitée</div>
+        <div class="mval cg" id="m-saved">—</div>
+        <div class="msub">kg/h économisés</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② LIVE CHART -->
+  <div>
+    <div class="sec-title">Courbe production temps réel</div>
+    <div class="live-wrap">
+      <div class="live-head">
+        <h2>
+          Production % en direct
+          <span class="live-pill green" id="lpill">LIVE</span>
+          <span style="font-size:11px;color:var(--muted);font-weight:400;font-family:monospace" id="ltime">—</span>
+        </h2>
+        <div class="live-ctrl">
+          Fenêtre
+          <select id="wsel" onchange="setWin(this.value)">
+            <option value="60">1 min</option>
+            <option value="300" selected>5 min</option>
+            <option value="900">15 min</option>
+            <option value="1800">30 min</option>
+          </select>
+        </div>
+      </div>
+      <div class="chart-box"><canvas id="live-chart"></canvas></div>
+      <div class="live-legend">
+        <div class="ll"><div class="ll-line" style="background:var(--green)"></div>Production %</div>
+        <div class="ll"><div class="ll-line" style="background:var(--red)"></div>Risque /100</div>
+        <div class="ll"><div class="ll-line" style="background:var(--blue)"></div>Vent km/h</div>
+        <div class="ll"><div class="ll-line" style="background:var(--yellow)"></div>Temp °C</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ MAP + SIDE -->
+  <div>
+    <div class="sec-title">Carte satellite & planning</div>
+    <div class="two-col">
+      <!-- MAP -->
+      <div class="map-wrap">
+        <div class="map-topbar">
+          <span>🛰️ Dispersion fumée — Gabes</span>
+          <span style="color:var(--muted);font-size:11px" id="mtime">—</span>
+        </div>
+        <div id="map"></div>
+        <div class="map-leg">
+          <h4>Zones pollution</h4>
+          <div class="ml-row"><div class="ml-dot" style="background:#ef444455;border:2px solid #ef4444"></div>Rouge — Danger 0–600m</div>
+          <div class="ml-row"><div class="ml-dot" style="background:#f9731640;border:2px solid #f97316"></div>Orange — 600m–2km</div>
+          <div class="ml-row"><div class="ml-dot" style="background:#eab30825;border:2px solid #eab308"></div>Jaune — 2–5km</div>
+          <div class="ml-row"><div class="ml-dot" style="background:#22c55e15;border:2px solid #22c55e"></div>Vert — 5–10km</div>
+          <hr>
+          <div class="ml-row"><div class="ml-line" style="background:#94a3b880"></div>Panache fumée</div>
+        </div>
+        <div class="map-wx">
+          <strong>🌬️ Météo actuelle</strong>
+          <div id="map-wx-body" style="color:var(--muted)">—</div>
+        </div>
+      </div>
+
+      <!-- SIDE -->
+      <div class="side">
+        <!-- Compass -->
+        <div class="compass-card">
+          <div class="sec-title" style="margin-bottom:12px">Direction vent</div>
+          <div class="compass-inner">
+            <svg id="cmp" viewBox="0 0 90 90">
+              <circle cx="45" cy="45" r="42" fill="none" stroke="#21262d" stroke-width="1.5"/>
+              <circle cx="45" cy="45" r="30" fill="none" stroke="#21262d" stroke-width=".5" stroke-dasharray="4 3"/>
+              <text x="45" y="8"  text-anchor="middle" fill="#7d8590" font-size="9" font-family="sans-serif" font-weight="600">N</text>
+              <text x="82" y="48" text-anchor="middle" fill="#7d8590" font-size="9" font-family="sans-serif" font-weight="600">E</text>
+              <text x="45" y="86" text-anchor="middle" fill="#7d8590" font-size="9" font-family="sans-serif" font-weight="600">S</text>
+              <text x="8"  y="48" text-anchor="middle" fill="#7d8590" font-size="9" font-family="sans-serif" font-weight="600">O</text>
+              <g id="carrow" transform="rotate(0,45,45)">
+                <line x1="45" y1="45" x2="45" y2="12" stroke="#a371f7" stroke-width="3" stroke-linecap="round"/>
+                <polygon points="45,7 41,17 49,17" fill="#a371f7"/>
+                <line x1="45" y1="45" x2="45" y2="68" stroke="#f85149" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 3"/>
+              </g>
+              <circle cx="45" cy="45" r="4" fill="#e6edf3"/>
+            </svg>
+            <div class="cmp-data">
+              <div class="cmp-val cp" id="cmp-deg">—°</div>
+              <div class="cmp-sub" id="cmp-name">—</div>
+              <div class="cmp-sub" id="cmp-spd" style="margin-top:2px">—</div>
+              <div class="cmp-tag tag-ok" id="cmp-tag">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 24h plan -->
+        <div class="plan-card">
+          <div class="sec-title" style="margin-bottom:12px">Planning production 24h</div>
+          <div class="bar-grid" id="hbars"></div>
+          <div class="lbl-grid" id="hlbls"></div>
+          <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
+            <span style="font-size:10px;color:var(--green)">■ 100% optimal</span>
+            <span style="font-size:10px;color:var(--yellow)">■ modéré</span>
+            <span style="font-size:10px;color:var(--red)">■ danger</span>
+          </div>
+        </div>
+
+        <!-- Recs -->
+        <div class="recs-card">
+          <div class="sec-title" style="margin-bottom:10px">Mesures immédiates</div>
+          <div id="recs-list"><div style="color:var(--muted)">Démarrez pour voir les recommandations.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ PRODUCTS -->
+  <div>
+    <div class="sec-title">Actions par produit</div>
+    <div class="products-wrap">
+      <div class="prod-grid" id="prod-grid">
+        <div style="color:var(--muted);grid-column:1/-1">Démarrez pour voir les actions par produit.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑤ BILAN MENSUEL -->
+  <div>
+    <div class="sec-title">Bilan mensuel IA</div>
+    <div class="bilan-wrap">
+      <div class="bilan-top">
+        <h2>📅 Analyse & Optimisation — Mois complet</h2>
+        <div class="bilan-top-right">
+          <select id="bilan-month">
+            <option value="0">Janvier</option><option value="1">Février</option>
+            <option value="2">Mars</option><option value="3">Avril</option>
+            <option value="4">Mai</option><option value="5">Juin</option>
+            <option value="6">Juillet</option><option value="7">Août</option>
+            <option value="8">Septembre</option><option value="9">Octobre</option>
+            <option value="10">Novembre</option><option value="11">Décembre</option>
+          </select>
+          <button class="btn btn-p" onclick="genBilan()" id="bilan-btn">🔄 Générer Bilan</button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="bilan-kpis">
+        <div class="bkpi">
+          <div class="bkpi-val cp" id="bk-prod">—</div>
+          <div class="bkpi-lbl">Production réelle moy.</div>
+          <div class="bkpi-tag" id="bk-prod-d">vs recommandé IA</div>
+        </div>
+        <div class="bkpi">
+          <div class="bkpi-val cg" id="bk-saved">—</div>
+          <div class="bkpi-lbl">Pollution évitée</div>
+          <div class="bkpi-tag tag-up" id="bk-saved-d">tonnes ce mois</div>
+        </div>
+        <div class="bkpi">
+          <div class="bkpi-val cy" id="bk-danger">—</div>
+          <div class="bkpi-lbl">Heures danger</div>
+          <div class="bkpi-tag" id="bk-danger-d">vent vers ville</div>
+        </div>
+        <div class="bkpi">
+          <div class="bkpi-val cb" id="bk-follow">—</div>
+          <div class="bkpi-lbl">Suivi IA</div>
+          <div class="bkpi-tag" id="bk-follow-d">recommandations suivies</div>
+        </div>
+      </div>
+
+      <!-- 3 cols -->
+      <div class="bilan-body">
+        <!-- Heatmap -->
+        <div class="bc">
+          <div class="bc-title">🗓️ Heatmap risque journalier</div>
+          <div class="hm-days" id="hm-days"></div>
+          <div class="hm-grid" id="hm-grid"></div>
+          <div style="display:flex;gap:10px;margin-top:10px;font-size:10px;flex-wrap:wrap">
+            <span style="color:var(--green)">■ Faible risque</span>
+            <span style="color:var(--yellow)">■ Modéré</span>
+            <span style="color:var(--red)">■ Élevé</span>
+          </div>
+        </div>
+        <!-- Product bars -->
+        <div class="bc">
+          <div class="bc-title">📊 Production par produit</div>
+          <div id="pm-bars"></div>
+        </div>
+        <!-- AI -->
+        <div class="bc">
+          <div class="bc-title">🤖 Analyse GPT-4o</div>
+          <div class="bilan-ai" id="bilan-ai">Cliquez "Générer Bilan" pour l'analyse complète du mois.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ RAPPORT -->
+  <div>
+    <div class="sec-title">Rapport IA instantané</div>
+    <div class="rapport-wrap">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <span style="font-size:13px;font-weight:600">🤖 GPT-4o — Analyse temps réel</span>
+        <button class="btn btn-p" onclick="genRapport()" style="font-size:11px;padding:5px 12px">Rapport complet</button>
+      </div>
+      <div class="rapport-out" id="rout">Entrez vos clés API et cliquez Démarrer.</div>
+      <div class="rapport-row">
+        <input id="qin" type="text" placeholder="Poser une question sur la pollution, la production, les produits..." onkeydown="if(event.key==='Enter')askQ()"/>
+        <button class="btn btn-p" onclick="askQ()">↗ Demander</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .page -->
+
+<script>
+// ══════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════
+const F = {
+  name:'Usine CPG/GCT Gabes', lat:33.8881, lon:10.0975,
+  cityLat:33.8869, cityLon:10.0982, seaLat:33.95, seaLon:10.28,
+  emRate:500
+};
+const PRODS = [
+  {id:'p1', name:'Acide Phosphorique', base:8,  sf:1.0, unit:'t/h',
+   act:{stop:'Arrêt réacteurs',     reduce:'Réduire débit phosphate', inc:'Augmenter alimentation'}},
+  {id:'p2', name:'Engrais DAP/TSP',   base:12, sf:0.6, unit:'t/h',
+   act:{stop:'Arrêt granulateurs',  reduce:'Réduire sécheurs',       inc:'Accélérer granulation'}},
+  {id:'p3', name:'Acide Sulfurique',  base:6,  sf:1.4, unit:'t/h',
+   act:{stop:'Bypasser convertisseur',reduce:'Baisser brûleur soufre',inc:'Monter charge soufre'}},
+  {id:'p4', name:'Fluosilicate Na',   base:2,  sf:0.4, unit:'t/h',
+   act:{stop:'Fermer scrubbers',    reduce:'Réduire absorption',     inc:'Ouvrir neutralisation'}},
+];
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let MAP=null, PL=[], ZL=[];
+let CLIVE=null;
+let WX=null, HOURS=[], RES=[];
+let OWM='', OAI='';
+let LIVE=[];
+let WIN=300;
+let liveIv=null;
+let MDATA=[];
+
+// ══════════════════════════════════════════════════════
+// RISK ENGINE
+// ══════════════════════════════════════════════════════
+function calcRisk(wd, ws, rain) {
+  const cAz = (Math.atan2(F.cityLon-F.lon, F.cityLat-F.lat)*180/Math.PI+360)%360;
+  const sAz = (Math.atan2(F.seaLon-F.lon,  F.seaLat-F.lat)*180/Math.PI+360)%360;
+  const dc  = Math.abs(((wd-cAz+180)%360)-180);
+  const ds  = Math.abs(((wd-sAz+180)%360)-180);
+  const cs  = Math.max(0,(90-dc)/90), ss = Math.max(0,(90-ds)/90);
+  let r = cs * (ws<8?1.15:ws<25?.85:.65) * Math.max(.25,1-rain*.12) * 100;
+  if(ss>.5) r *= (1-ss*.45);
+  return Math.min(100, r);
+}
+
+function getRec(r) {
+  if(r<20) return {p:100, l:'OPTIMAL',  c:'cg', col:'#3fb950', bgs:'#0d2e16', bgt:'#3fb950'};
+  if(r<38) return {p:80,  l:'BON',      c:'cg', col:'#4ade80', bgs:'#0d2e16', bgt:'#3fb950'};
+  if(r<52) return {p:60,  l:'MODÉRÉ',   c:'cy', col:'#d29922', bgs:'#2e1900', bgt:'#fbbf24'};
+  if(r<65) return {p:40,  l:'MAUVAIS',  c:'co', col:'#db6d28', bgs:'#2e1100', bgt:'#fb923c'};
+  if(r<78) return {p:20,  l:'DANGER',   c:'cr', col:'#f85149', bgs:'#2d0c09', bgt:'#f87171'};
+  return         {p:0,   l:'ARRÊT',    c:'cr', col:'#7f1d1d', bgs:'#2d0c09', bgt:'#f87171'};
+}
+
+function dn(d) {
+  return ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'][Math.round(d/22.5)%16];
+}
+
+// ══════════════════════════════════════════════════════
+// MAP
+// ══════════════════════════════════════════════════════
+function initMap() {
+  if(MAP) return;
+  MAP = L.map('map',{zoomControl:true}).setView([F.lat,F.lon],13);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    {maxZoom:19,attribution:'© ESRI'}).addTo(MAP);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+    {maxZoom:19,opacity:.7}).addTo(MAP);
+  addMkr(F.lat,F.lon,'🏭','#f85149',`<div class="pt">🏭 ${F.name}</div><div class="pr"><span>Position</span><b>${F.lat}°N, ${F.lon}°E</b></div><div class="pr"><span>Émission max</span><b>500 kg/h SO₂+NOₓ</b></div><div class="pr"><span>Hauteur cheminée</span><b>80 m</b></div>`,28);
+  addMkr(F.cityLat,F.cityLon,'🏙️','#58a6ff','<div class="pt">🏙️ Ville de Gabes</div><div class="pr"><span>Population</span><b>~130 000 hab.</b></div><div class="pr"><span>Distance usine</span><b>~2 km</b></div>',23);
+  addMkr(F.seaLat,F.seaLon,'🌊','#3fb950','<div class="pt">🌊 Golfe de Gabes</div><div class="pr"><span>Direction favorable</span><b>Vent NE/E/SE</b></div>',21);
+}
+
+function addMkr(lat,lon,ico,col,popup,sz) {
+  L.marker([lat,lon],{icon:L.divIcon({
+    html:`<div style="width:${sz+8}px;height:${sz+8}px;background:#161b22;border:2px solid ${col};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:${sz-4}px;box-shadow:0 0 0 3px ${col}30">${ico}</div>`,
+    iconSize:[sz+8,sz+8],iconAnchor:[(sz+8)/2,(sz+8)/2],className:''
+  })}).addTo(MAP).bindPopup(popup,{maxWidth:230});
+}
+
+function updatePlume(wDeg, wSpd, risk) {
+  PL.forEach(l=>MAP.removeLayer(l)); ZL.forEach(l=>MAP.removeLayer(l));
+  PL=[]; ZL=[];
+  const rad=wDeg*Math.PI/180, R=111.32, cL=Math.cos(F.lat*Math.PI/180);
+  const maxKm=Math.min(20,Math.max(4,wSpd*.5)), N=40;
+  const axis=[[F.lat,F.lon]];
+  for(let i=1;i<=N;i++){const d=(i/N)*maxKm;axis.push([F.lat+(d/R)*Math.cos(rad),F.lon+(d/(R*cL))*Math.sin(rad)]);}
+  const sc = risk>65?'#ef4444':risk>40?'#f97316':'#94a3b8';
+  PL.push(L.polyline(axis,{color:sc,weight:3,opacity:.8,dashArray:'10 5'}).addTo(MAP).bindTooltip(`🌬️ ${wSpd.toFixed(1)} km/h → ${dn(wDeg)}`,{sticky:true}));
+  const perp=rad+Math.PI/2;
+  [.15,.30,.46].forEach((sp,i)=>{
+    [-1,1].forEach(side=>{
+      const pts=axis.map((pt,j)=>{const t=j/N,s=t*maxKm*sp*Math.pow(Math.sin(t*Math.PI),.55)*side;return[pt[0]+(s/R)*Math.cos(perp),pt[1]+(s/(R*cL))*Math.sin(perp)];});
+      PL.push(L.polyline(pts,{color:sc,weight:1.5,opacity:Math.max(.04,.2-i*.06)}).addTo(MAP));
+    });
+  });
+  const top=[],bot=[];
+  for(let i=0;i<=N;i++){const t=i/N,d=t*maxKm,s=d*.4*Math.pow(Math.sin(t*Math.PI),.55),bLat=F.lat+(d/R)*Math.cos(rad),bLon=F.lon+(d/(R*cL))*Math.sin(rad);top.push([bLat+(s/R)*Math.cos(perp),bLon+(s/(R*cL))*Math.sin(perp)]);bot.unshift([bLat-(s/R)*Math.cos(perp),bLon-(s/(R*cL))*Math.sin(perp)]);}
+  PL.push(L.polygon([...top,...bot],{color:sc,weight:.5,opacity:.3,fillColor:sc,fillOpacity:.07}).addTo(MAP));
+  const zc=[F.lat+(1.2/R)*Math.cos(rad),F.lon+(1.2/(R*cL))*Math.sin(rad)];
+  [{r:600,c:'#ef4444',fo:.26,t:'🔴 Danger 0–600m'},{r:2000,c:'#f97316',fo:.13,t:'🟠 600m–2km'},{r:5000,c:'#eab308',fo:.06,t:'🟡 2–5km'},{r:10000,c:'#22c55e',fo:.03,t:'🟢 5–10km'}]
+    .forEach(z=>{ZL.push(L.circle(zc,{radius:z.r,color:z.c,weight:.6,fillColor:z.c,fillOpacity:z.fo}).addTo(MAP).bindTooltip(z.t,{sticky:true}));});
+}
+
+// ══════════════════════════════════════════════════════
+// LIVE CHART — requestAnimationFrame smooth
+// ══════════════════════════════════════════════════════
+function initLive() {
+  const ctx = document.getElementById('live-chart').getContext('2d');
+  CLIVE = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels:[],
+      datasets:[
+        {label:'Production %', data:[], borderColor:'#3fb950', backgroundColor:'rgba(63,185,80,.12)', borderWidth:2.5, pointRadius:0, tension:.45, yAxisID:'y',  fill:true},
+        {label:'Risque /100',  data:[], borderColor:'#f85149', backgroundColor:'transparent',         borderWidth:2,   pointRadius:0, tension:.45, yAxisID:'y',  fill:false},
+        {label:'Vent km/h',    data:[], borderColor:'#58a6ff', backgroundColor:'transparent',         borderWidth:1.5, pointRadius:0, tension:.45, yAxisID:'y2', fill:false},
+        {label:'Temp °C',      data:[], borderColor:'#d29922', backgroundColor:'transparent',         borderWidth:1.5, pointRadius:0, tension:.45, yAxisID:'y2', fill:false},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      animation:false,           // désactiver animation chart.js — on gère nous-mêmes
+      interaction:{mode:'index', intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#1c2128', borderColor:'#30363d', borderWidth:1,
+          titleColor:'#e6edf3', bodyColor:'#7d8590', titleFont:{family:'monospace'},
+          callbacks:{
+            title: i => '⏱ '+i[0].label,
+            label: i => {
+              const icons=['🏭','☣️','💨','🌡️'], units=['%','/100','km/h','°C'];
+              return ` ${icons[i.datasetIndex]} ${i.dataset.label}: ${(+i.parsed.y).toFixed(1)}${units[i.datasetIndex]}`;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ticks:{color:'#7d8590',font:{size:9,family:'monospace'},maxRotation:0,maxTicksLimit:10}, grid:{color:'#21262d'}, border:{display:false}},
+        y: {position:'left',  min:0, max:105, ticks:{color:'#7d8590',font:{size:9},callback:v=>v+'%'}, grid:{color:'#21262d'}, border:{display:false},
+            title:{display:true,text:'Prod % / Risque',color:'#7d8590',font:{size:10}}},
+        y2:{position:'right', min:0, max:55,  ticks:{color:'#7d8590',font:{size:9}}, grid:{drawOnChartArea:false}, border:{display:false},
+            title:{display:true,text:'km/h · °C',color:'#7d8590',font:{size:10}}},
+      }
+    }
+  });
+}
+
+// called by rAF loop every ~100ms
+function tickLive(prod, risk, wind, temp) {
+  const now = new Date();
+  const ts = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+':'+now.getSeconds().toString().padStart(2,'0');
+
+  // add point
+  LIVE.push({t:now.getTime(), ts, prod, risk, wind, temp});
+
+  // prune
+  const cut = now.getTime() - WIN*1000;
+  while(LIVE.length && LIVE[0].t < cut) LIVE.shift();
+
+  if(!CLIVE) return;
+  CLIVE.data.labels           = LIVE.map(d=>d.ts);
+  CLIVE.data.datasets[0].data = LIVE.map(d=>d.prod);
+  CLIVE.data.datasets[1].data = LIVE.map(d=>d.risk);
+  CLIVE.data.datasets[2].data = LIVE.map(d=>d.wind);
+  CLIVE.data.datasets[3].data = LIVE.map(d=>d.temp);
+  CLIVE.update('none'); // instant, no animation
+
+  document.getElementById('ltime').textContent = ts;
+  const pill = document.getElementById('lpill');
+  if(risk>65){pill.className='live-pill red';pill.textContent='DANGER';}
+  else if(risk>38){pill.className='live-pill yellow';pill.textContent='MODÉRÉ';}
+  else{pill.className='live-pill green';pill.textContent='LIVE';}
+}
+
+function setWin(v){ WIN=parseInt(v); }
+
+// ══════════════════════════════════════════════════════
+// UI UPDATE — called on every tick
+// ══════════════════════════════════════════════════════
+function updateUI(wx) {
+  const risk  = calcRisk(wx.windDeg, wx.windSpd, wx.rain);
+  const rec   = getRec(risk);
+  const saved = (1 - rec.p/100) * F.emRate;
+  const toSea = Math.abs(((wx.windDeg-80+180)%360)-180) < 55;
+
+  // Metrics
+  document.getElementById('m-wind').textContent   = wx.windSpd.toFixed(1);
+  document.getElementById('m-wind').className     = 'mval '+(wx.windSpd>30?'cy':'cg');
+  document.getElementById('m-wind-s').textContent = `km/h — rafales ${wx.gust.toFixed(1)} km/h`;
+  document.getElementById('m-wind-dir').textContent = dn(wx.windDeg)+' ('+wx.windDeg.toFixed(0)+'°)';
+
+  document.getElementById('m-prod').textContent   = rec.p+'%';
+  document.getElementById('m-prod').className     = 'mval '+rec.c;
+  document.getElementById('m-prod-tag').textContent = rec.l;
+  document.getElementById('m-prod-tag').style.background = rec.bgs;
+  document.getElementById('m-prod-tag').style.color = rec.bgt;
+  document.getElementById('mc1').className = 'mcard'+(risk>65?' danger-glow':'');
+
+  document.getElementById('m-risk').textContent   = risk.toFixed(0);
+  document.getElementById('m-risk').className     = 'mval '+rec.c;
+  document.getElementById('mc2').className = 'mcard'+(risk>65?' danger-glow':'');
+
+  document.getElementById('m-temp').textContent   = wx.temp.toFixed(1)+'°C';
+  document.getElementById('m-temp-s').textContent = `hum ${wx.hum}% · pluie ${wx.rain.toFixed(1)} mm`;
+
+  document.getElementById('m-saved').textContent  = saved.toFixed(0);
+
+  // Alert
+  const ab = document.getElementById('abar');
+  if(risk>65){
+    ab.className='alert on danger';
+    document.getElementById('aico').textContent='🔴';
+    document.getElementById('atxt').textContent=`ALERTE — Vent ${dn(wx.windDeg)} (${wx.windDeg.toFixed(0)}°) vers la ville! Risque ${risk.toFixed(0)}/100 — Réduire production à ${rec.p}% maintenant`;
+  } else if(risk>38){
+    ab.className='alert on warning';
+    document.getElementById('aico').textContent='⚠️';
+    document.getElementById('atxt').textContent=`Surveillance — Vent ${dn(wx.windDeg)} risque modéré ${risk.toFixed(0)}/100 — Production ${rec.p}%`;
+  } else {
+    ab.className='alert';
+  }
+
+  // Compass
+  document.getElementById('carrow').setAttribute('transform',`rotate(${wx.windDeg},45,45)`);
+  document.getElementById('cmp-deg').textContent  = wx.windDeg.toFixed(0)+'°';
+  document.getElementById('cmp-name').textContent = dn(wx.windDeg);
+  document.getElementById('cmp-spd').textContent  = wx.windSpd.toFixed(1)+' km/h';
+  const ct = document.getElementById('cmp-tag');
+  ct.textContent = toSea?'✅ Vent mer — favorable':'⚠️ Risque direction ville';
+  ct.className   = 'cmp-tag '+(toSea?'tag-ok':'tag-warn');
+
+  // Map overlay
+  document.getElementById('map-wx-body').innerHTML = `💨 <b>${wx.windSpd.toFixed(1)} km/h ${dn(wx.windDeg)}</b><br>🏭 <span style="color:${rec.col};font-weight:700">${rec.p}%</span> production<br>☣️ Risque <span style="color:${rec.col};font-weight:700">${risk.toFixed(0)}/100</span>`;
+  document.getElementById('mtime').textContent = new Date().toLocaleTimeString('fr-TN');
+
+  // Plume
+  updatePlume(wx.windDeg, wx.windSpd, risk);
+
+  // Recs
+  renderRecs(risk, wx.windDeg, wx.windSpd, wx.rain, rec);
+
+  // Products
+  renderProds(risk, wx.windDeg, wx.windSpd, wx.rain, rec);
+
+  // Live chart tick
+  tickLive(rec.p, risk, wx.windSpd, wx.temp);
+}
+
+// ══════════════════════════════════════════════════════
+// RECOMMENDATIONS
+// ══════════════════════════════════════════════════════
+function renderRecs(risk, wd, ws, rain, rec) {
+  const toSea = Math.abs(((wd-80+180)%360)-180) < 55;
+  const items = [];
+  if(risk>=65){
+    items.push({c:'rn-r',t:`Réduire production à ${rec.p}% immédiatement`,s:`Vent ${dn(wd)} (${wd.toFixed(0)}°) — risque ville ${risk.toFixed(0)}/100`});
+    items.push({c:'rn-r',t:'Arrêter Acide Sulfurique — polluant majeur',s:'Priorité absolue: réduction SO₂ immédiate'});
+    items.push({c:'rn-o',t:'Activer scrubbers à plein débit',s:'Augmenter eau lavage dans tours absorption'});
+    if(ws<10) items.push({c:'rn-r',t:'Vent faible — fumée très concentrée',s:`${ws.toFixed(1)} km/h: dispersion minimale`});
+  } else if(risk>=38){
+    items.push({c:'rn-y',t:`Maintenir ${rec.p}% — surveillance renforcée`,s:'Contrôler direction vent toutes les 15 min'});
+    items.push({c:'rn-o',t:'Préparer réduction si vent tourne',s:'Seuil: risque > 65/100 → action immédiate'});
+    if(!toSea) items.push({c:'rn-y',t:'Éviter hausse de production',s:'Vent ambigu — attendre stabilisation'});
+  } else {
+    items.push({c:'rn-g',t:`Conditions optimales — ${rec.p}% production`,s:`Vent ${dn(wd)} → ${toSea?'mer (idéal)':'direction favorable'}`});
+    items.push({c:'rn-g',t:'Fenêtre maintenance préventive',s:'Vérifier scrubbers pendant conditions favorables'});
+    items.push({c:'rn-g',t:'Augmenter Acide Sulfurique',s:'SO₂ dispersé vers mer — maximiser rendement'});
+    if(rain>0) items.push({c:'rn-g',t:`Pluie ${rain.toFixed(1)}mm — lavage atmosphérique naturel`,s:'Effet naturel de réduction particules'});
+  }
+  document.getElementById('recs-list').innerHTML = items.map((m,i)=>
+    `<div class="rec-item">
+       <div class="rec-num ${m.c}">${i+1}</div>
+       <div class="rec-body"><div class="rt">${m.t}</div><div class="rs">${m.s}</div></div>
+     </div>`
+  ).join('');
+}
+
+// ══════════════════════════════════════════════════════
+// PRODUCTS
+// ══════════════════════════════════════════════════════
+function renderProds(risk, wd, ws, rain, rec) {
+  const toSea = Math.abs(((wd-80+180)%360)-180) < 55;
+  const html = PRODS.map(p => {
+    let pct, action, cls, smoke;
+    if(risk>=78){ pct=0;             action=p.act.stop;              cls='stop';   smoke=`Arrêt → évite ${(p.base*p.sf*.08).toFixed(1)}t/h SO₂`; }
+    else if(risk>=65){ pct=Math.max(5,rec.p-(p.sf>1?15:5)); action=p.act.reduce+` → ${pct}%`; cls='stop';   smoke=`Réduit SO₂ -${((1-pct/100)*p.sf*p.base*.05).toFixed(1)}t/h`; }
+    else if(risk>=52){ pct=rec.p-(p.sf>1?10:0);            action=p.act.reduce+` → ${pct}%`; cls='reduce'; smoke=`Pollution -${((1-pct/100)*p.sf*20).toFixed(0)}%`; }
+    else if(risk>=38){
+      if(p.sf<0.6){ pct=Math.min(100,rec.p+15); action=p.act.inc+' (faible fumée)'; cls='boost';  smoke='Compense les lignes réduites'; }
+      else         { pct=rec.p;                  action=p.act.reduce;                cls='reduce'; smoke='Surveiller émissions'; }
+    } else {
+      pct=100; action=p.act.inc+(rain>0?' — pluie aide':''); cls=toSea?'ok':'boost';
+      smoke=toSea?'Vent mer → fumée dispersée':'Conditions favorables';
+    }
+    // JAMAIS > 100%
+    pct=Math.min(100,Math.max(0,pct));
+    const barCol = cls==='stop'?'#f85149':cls==='reduce'?'#db6d28':cls==='ok'?'#3fb950':'#58a6ff';
+    const delta  = pct-100;
+    const ds     = delta===0?'MAX':delta>0?`+${delta}%`:`${delta}%`;
+    const valCol = pct>=80?'#3fb950':pct>=50?'#d29922':pct>=20?'#db6d28':'#f85149';
+    return `<div class="prod-card ${cls}">
+      <div class="prod-name">${p.name}</div>
+      <div class="prod-pct-row">
+        <div class="prod-pct" style="color:${valCol}">${pct}%</div>
+        <div class="prod-delta" style="color:${valCol};font-size:12px">${ds}</div>
+      </div>
+      <div class="prod-bar-bg"><div class="prod-bar-fg" style="width:${pct}%;background:${barCol}"></div></div>
+      <div class="prod-action">📌 ${action}</div>
+      <div class="prod-smoke">💨 ${smoke}</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">⚡ ${((pct/100)*p.base).toFixed(1)} ${p.unit}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('prod-grid').innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════
+// 24H BARS
+// ══════════════════════════════════════════════════════
+function buildRes(hours) {
+  return hours.slice(0,24).map(h=>{
+    const r=calcRisk(h.windDeg,h.windSpd,h.rain), rc=getRec(r);
+    return{hour:h.dt.getHours()+'h', risk:r, rec:rc, wSpd:h.windSpd, wDir:dn(h.windDeg), poll:(rc.p/100)*F.emRate};
+  });
+}
+function renderBars(res) {
+  const curH = new Date().getHours();
+  document.getElementById('hbars').innerHTML = res.map((r,i)=>`<div class="hbar${parseInt(r.hour)===curH?' now':''}" style="background:${r.rec.col};height:${Math.max(4,r.rec.p/100*52)}px" title="${r.hour}: ${r.rec.l} (${r.rec.p}%) — ${r.wDir} ${r.wSpd.toFixed(0)}km/h"></div>`).join('');
+  document.getElementById('hlbls').innerHTML = res.map(r=>`<span>${r.hour}</span>`).join('');
+}
+
+// ══════════════════════════════════════════════════════
+// BILAN MENSUEL
+// ══════════════════════════════════════════════════════
+function simMonth(mIdx) {
+  const year=new Date().getFullYear(), days=new Date(year,mIdx+1,0).getDate();
+  const sw=[
+    {ad:50,sd:40,as:16,r:.3},{ad:55,sd:35,as:15,r:.25},{ad:60,sd:45,as:18,r:.15},{ad:65,sd:50,as:17,r:.1},
+    {ad:70,sd:55,as:16,r:.05},{ad:75,sd:60,as:18,r:.02},{ad:80,sd:50,as:20,r:.01},{ad:75,sd:45,as:19,r:.01},
+    {ad:60,sd:55,as:16,r:.08},{ad:50,sd:50,as:15,r:.2},{ad:45,sd:45,as:14,r:.3},{ad:48,sd:40,as:15,r:.35}
+  ][mIdx];
+  const data=[];
+  for(let d=1;d<=days;d++){
+    const hrs=[];
+    for(let h=0;h<24;h++){
+      const wd=(sw.ad+(Math.random()-.5)*sw.sd*2+360)%360;
+      const ws=Math.max(3,sw.as+(Math.random()-.5)*8);
+      const rain=Math.random()<sw.r?Math.random()*5:0;
+      const risk=calcRisk(wd,ws,rain), rec=getRec(risk);
+      const fIA=Math.random()<.75;
+      // Cap strict à 100% — jamais au-dessus
+      const actPct=Math.min(100,Math.max(0,fIA?rec.p:rec.p+(Math.random()>.5?15:-15)));
+      hrs.push({risk,recPct:rec.p,actPct});
+    }
+    data.push({
+      day:d,
+      avgRisk:hrs.reduce((s,h)=>s+h.risk,0)/24,
+      recProd:hrs.reduce((s,h)=>s+h.recPct,0)/24,
+      actProd:hrs.reduce((s,h)=>s+h.actPct,0)/24,
+      dangerH:hrs.filter(h=>h.risk>65).length,
+      pollRec:hrs.reduce((s,h)=>s+(h.recPct/100)*F.emRate,0),
+      pollAct:hrs.reduce((s,h)=>s+(h.actPct/100)*F.emRate,0),
+      hours:hrs
+    });
+  }
+  return data;
+}
+
+async function genBilan() {
+  const mIdx=parseInt(document.getElementById('bilan-month').value);
+  const MNAMES=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const btn=document.getElementById('bilan-btn');
+  btn.textContent='⏳ Calcul...'; btn.disabled=true;
+
+  MDATA=simMonth(mIdx);
+
+  // KPIs
+  const totAct=MDATA.reduce((s,d)=>s+d.pollAct,0);
+  const totMax=F.emRate*24*MDATA.length;
+  const totRec=MDATA.reduce((s,d)=>s+d.pollRec,0);
+  // Pollution évitée = ce qu'on a évité vs production à 100% non-stop
+  const savedVsMax=(totMax-totAct)/1000;
+  // Gain IA = ce qu'on aurait pu éviter de PLUS si on avait parfaitement suivi l'IA
+  const gainIfFollowedIA=(totAct-totRec)/1000;
+  const savedT=Math.max(0,savedVsMax);
+  const avgAct=MDATA.reduce((s,d)=>s+d.actProd,0)/MDATA.length;
+  const avgRec=MDATA.reduce((s,d)=>s+d.recProd,0)/MDATA.length;
+  const dangerH=MDATA.reduce((s,d)=>s+d.dangerH,0);
+  const followPct=Math.min(100,Math.round((1-Math.abs(totAct-totRec)/totMax)*100));
+  const diff=avgAct-avgRec;
+
+  document.getElementById('bk-prod').textContent    = avgAct.toFixed(1)+'%';
+  document.getElementById('bk-prod-d').className    = 'bkpi-tag '+(diff>=0?'tag-up':'tag-dn');
+  document.getElementById('bk-prod-d').textContent  = (diff>=0?'+':'')+diff.toFixed(1)+'% vs IA';
+  document.getElementById('bk-saved').textContent   = savedT.toFixed(1)+'t';
+  document.getElementById('bk-saved-d').textContent = gainIfFollowedIA>0.1
+    ? `dont +${gainIfFollowedIA.toFixed(1)}t possible si suivi IA parfait`
+    : 'objectif IA atteint ✓';
+  document.getElementById('bk-danger').textContent  = dangerH+'h';
+  document.getElementById('bk-danger-d').className  = 'bkpi-tag '+(dangerH>100?'tag-dn':'tag-eq');
+  document.getElementById('bk-danger-d').textContent= (dangerH/MDATA.length/24*100).toFixed(0)+'% du mois';
+  document.getElementById('bk-follow').textContent  = followPct+'%';
+  document.getElementById('bk-follow-d').className  = 'bkpi-tag '+(followPct>=80?'tag-up':'tag-dn');
+  document.getElementById('bk-follow-d').textContent= followPct>=80?'Bon suivi':'À améliorer';
+
+  // Heatmap
+  const firstDay=(new Date(new Date().getFullYear(),mIdx,1).getDay()+6)%7;
+  document.getElementById('hm-days').innerHTML='LMMJVSDi'.split('').map((d,i)=>i<7?`<span>${['L','M','M','J','V','S','D'][i]}</span>`:'').join('');
+  document.getElementById('hm-grid').innerHTML=
+    Array(firstDay).fill('<div class="hm-cell" style="background:transparent;pointer-events:none"></div>').join('')+
+    MDATA.map(d=>{
+      const r=d.avgRisk;
+      const h=r>65?0:r>38?30:120, s=r>65?70:r>38?65:50, l=r>65?30:r>38?28:20;
+      return `<div class="hm-cell" style="background:hsl(${h},${s}%,${l}%)" data-tip="J${d.day}: Risque ${d.avgRisk.toFixed(0)}/100 · Prod ${d.actProd.toFixed(0)}% · ${d.dangerH}h danger"></div>`;
+    }).join('');
+
+  // Product bars — chaque produit a sa propre production moyenne + pollution réellement évitée
+  document.getElementById('pm-bars').innerHTML=PRODS.map(p=>{
+    // Production moyenne pour CE produit selon son smoke factor
+    // Les produits à sf élevé sont réduits plus en cas de danger
+    const prodAvgPct=MDATA.reduce((s,d)=>s+d.hours.reduce((a,h)=>{
+      // Recalcul: produit à sf élevé = réduit plus lors des heures de danger
+      const penalty = h.risk>65?p.sf*30:h.risk>38?p.sf*10:0;
+      return a+Math.min(100,Math.max(0,h.actPct-penalty));
+    },0)/d.hours.length,0)/MDATA.length;
+
+    // Pollution évitée = (émission à 100% - émission réelle) pour CE produit sur le mois
+    const emissionMax   = p.base * p.sf * 24 * MDATA.length; // kg totaux si 100%
+    const emissionReelle= (prodAvgPct/100) * p.base * p.sf * 24 * MDATA.length;
+    const savedKg       = Math.max(0, emissionMax - emissionReelle);
+    const savedTonnes   = (savedKg/1000).toFixed(1);
+
+    // Couleur selon smoke factor: rouge=polluant, jaune=moyen, vert=faible
+    const barHex = p.sf>1.1?'#f85149':p.sf>.7?'#d29922':'#3fb950';
+    const tagHex = p.sf>1.1?'#2d0c09':p.sf>.7?'#2e1900':'#0d2e16';
+
+    return `<div class="pm-item">
+      <div class="pm-hdr">
+        <span style="color:var(--text)">${p.name}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;font-weight:700;color:${barHex}">${prodAvgPct.toFixed(0)}%</span>
+          <span style="background:${tagHex};color:${barHex};font-size:10px;padding:1px 6px;border-radius:10px;font-weight:600">${savedTonnes}t évitées</span>
+        </div>
+      </div>
+      <div class="pm-bg">
+        <div class="pm-fg" style="width:${prodAvgPct}%;background:${barHex}"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  btn.textContent='🔄 Générer Bilan'; btn.disabled=false;
+
+  // AI
+  const aiEl=document.getElementById('bilan-ai');
+  if(!OAI){
+    aiEl.textContent=`Bilan ${MNAMES[mIdx]} — Résumé:\n• Production réelle: ${avgAct.toFixed(1)}% (IA recommande: ${avgRec.toFixed(1)}%)\n• Pollution évitée: ${savedT.toFixed(1)}t\n• Heures danger: ${dangerH}h\n• Suivi IA: ${followPct}%\n\nPour l'analyse complète avec recommandations par produit et plan d'optimisation, entrez votre clé OpenAI.`;
+    return;
+  }
+  aiEl.innerHTML='<div class="spinner-wrap"><div class="spin"></div>Analyse GPT-4o en cours...</div>';
+
+  const gainPot=((totAct-totRec)/totAct*100).toFixed(1);
+  try{
+    const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+OAI},
+      body:JSON.stringify({model:'gpt-4o',max_tokens:800,temperature:.7,messages:[
+        {role:'system',content:'Expert pollution industrielle Tunisie. Rapport professionnel précis en français.'},
+        {role:'user',content:`BILAN ${MNAMES[mIdx].toUpperCase()} — Usine CPG/GCT Gabes\n\nDonnées:\n• Production réelle moy: ${avgAct.toFixed(1)}% (recommandé IA: ${avgRec.toFixed(1)}%, écart: ${diff>0?'+':''}${diff.toFixed(1)}%)\n• Pollution évitée vs max: ${savedT.toFixed(1)} tonnes SO₂+NOₓ\n• Heures danger (vent→ville): ${dangerH}h (${(dangerH/MDATA.length/24*100).toFixed(0)}% du mois)\n• Suivi recommandations IA: ${followPct}%\n• Gain potentiel restant: ${gainPot}%\n\nProduits: Acide Phosphorique (sf 1.0), Engrais DAP/TSP (sf 0.6), Acide Sulfurique (sf 1.4, polluant majeur), Fluosilicate Na (sf 0.4)\n\nRapport 300 mots:\n## Synthèse\n## Analyse par produit (% recommandé mois prochain pour chaque produit)\n## Bilan OMS (vs seuil SO₂ 20 μg/m³)\n## Plan d'optimisation mois prochain (3 actions concrètes avec % gain attendu)`}
+      ]})});
+    const d=await r.json();
+    if(d.error) throw Error(d.error.message);
+    aiEl.textContent=d.choices[0].message.content;
+  }catch(e){aiEl.textContent='Erreur OpenAI: '+e.message;}
+}
+
+// ══════════════════════════════════════════════════════
+// OWM
+// ══════════════════════════════════════════════════════
+async function fetchOWM(k) {
+  const p=`lat=${F.lat}&lon=${F.lon}&appid=${k}&units=metric&lang=fr`;
+  const [rc,rf]=await Promise.all([
+    fetch(`https://api.openweathermap.org/data/2.5/weather?${p}`).then(r=>{if(!r.ok)throw Error('OWM '+r.status);return r.json()}),
+    fetch(`https://api.openweathermap.org/data/2.5/forecast?${p}&cnt=24`).then(r=>{if(!r.ok)throw Error('OWM '+r.status);return r.json()}),
+  ]);
+  return {
+    now:{temp:rc.main.temp,hum:rc.main.humidity,windSpd:rc.wind.speed*3.6,windDeg:rc.wind.deg||0,gust:(rc.wind.gust||0)*3.6,rain:(rc.rain||{})['1h']||0,clouds:rc.clouds.all},
+    hours:rf.list.map(i=>({dt:new Date(i.dt*1000),temp:i.main.temp,windSpd:i.wind.speed*3.6,windDeg:i.wind.deg||0,rain:(i.rain||{})['3h']||0}))
+  };
+}
+
+// ══════════════════════════════════════════════════════
+// RAPPORT
+// ══════════════════════════════════════════════════════
+function buildCtx() {
+  if(!WX) return '';
+  const risk=calcRisk(WX.windDeg,WX.windSpd,WX.rain),rec=getRec(risk);
+  return `Usine CPG/GCT Gabes — Vent: ${WX.windSpd.toFixed(1)} km/h ${dn(WX.windDeg)} (${WX.windDeg}°) — Temp: ${WX.temp.toFixed(1)}°C — Pluie: ${WX.rain}mm — Risque: ${risk.toFixed(0)}/100 — Niveau: ${rec.l} — Production: ${rec.p}%`;
+}
+async function genRapport() {
+  const out=document.getElementById('rout');
+  if(!WX){out.textContent='Démarrez le tableau de bord.';return}
+  if(!OAI){out.textContent='Entrez votre clé OpenAI pour le rapport IA.';return}
+  out.textContent='GPT-4o en cours...';
+  try{
+    const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+OAI},body:JSON.stringify({model:'gpt-4o',max_tokens:600,temperature:.7,messages:[{role:'system',content:'Expert pollution Gabes. Français, professionnel.'},{role:'user',content:`${buildCtx()}\n\nRapport 200 mots: situation + actions produits + bilan pollution + recommandations demain`}]})});
+    const d=await r.json();if(d.error)throw Error(d.error.message);
+    out.textContent=d.choices[0].message.content;
+  }catch(e){out.textContent='Erreur: '+e.message;}
+}
+async function askQ() {
+  const q=document.getElementById('qin').value.trim();if(!q)return;
+  if(!OAI){alert('Entrez votre clé OpenAI.');return}
+  if(!WX){alert('Démarrez le tableau de bord.');return}
+  const out=document.getElementById('rout'),prev=out.textContent;
+  out.textContent=prev+`\n\n───────\n❓ ${q}\n⏳ GPT-4o...`;
+  document.getElementById('qin').value='';
+  try{
+    const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+OAI},body:JSON.stringify({model:'gpt-4o',max_tokens:400,temperature:.7,messages:[{role:'system',content:'Expert pollution Gabes. Court et pratique.'},{role:'user',content:`Contexte: ${buildCtx()}\n\nQuestion: ${q}`}]})});
+    const d=await r.json();if(d.error)throw Error(d.error.message);
+    out.textContent=prev+`\n\n───────\n❓ ${q}\n\n${d.choices[0].message.content}`;
+    out.scrollTop=out.scrollHeight;
+  }catch(e){out.textContent=prev+`\n\n[Erreur: ${e.message}]`;}
+}
+
+// ══════════════════════════════════════════════════════
+// START / DEMO — rAF loop for smooth live chart
+// ══════════════════════════════════════════════════════
+function setSt(t,on){document.getElementById('stxt').textContent=t;document.getElementById('sdot').className='dot'+(on?'':' off');}
+
+let rafId=null, lastTick=0, demoTick=0;
+const DEMO_W=[45,45,45,40,35,200,220,200,180,100,50,45,40,38,45,50,200,215,200,180,50,45,45,45];
+const DEMO_S=[18,17,16,14,12,10,10,11,13,15,18,20,22,21,19,17,12,11,10,13,16,18,19,18];
+
+function rafLoop(ts) {
+  rafId = requestAnimationFrame(rafLoop);
+  // push live point every 1 second
+  if(ts - lastTick < 1000) return;
+  lastTick = ts;
+
+  if(!WX) return;
+
+  // In demo mode: evolve wind slightly each second
+  if(!OWM) {
+    const idx = Math.floor(demoTick/10)%24; // change wind pattern every 10s
+    const noise = (Math.random()-.5)*5;
+    WX.windDeg = ((DEMO_W[idx]+noise)+360)%360;
+    WX.windSpd = Math.max(3, DEMO_S[idx]+(Math.random()-.5)*1.5);
+    WX.temp    = 24+Math.sin(demoTick/120)*3+(Math.random()-.5)*.5;
+    WX.rain    = Math.random()>.96?Math.random()*1.5:Math.max(0,WX.rain-.05);
+    WX.gust    = WX.windSpd*1.3;
+    demoTick++;
+    updateUI(WX);
+  } else {
+    // Real mode: just push current WX to live chart (weather fetched every 5min separately)
+    if(WX) {
+      const risk=calcRisk(WX.windDeg,WX.windSpd,WX.rain),rec=getRec(risk);
+      tickLive(rec.p,risk,WX.windSpd,WX.temp);
+    }
+  }
+}
+
+async function startDash(){
+  OWM=document.getElementById('owm').value.trim();
+  OAI=document.getElementById('oai').value.trim();
+  if(!OWM){alert('Entrez votre clé OpenWeatherMap.');return}
+  if(rafId){cancelAnimationFrame(rafId);rafId=null;}
+  if(liveIv){clearInterval(liveIv);liveIv=null;}
+  setSt('Connexion OpenWeatherMap...',false);
+  initMap(); if(!CLIVE) initLive();
+
+  const doFetch=async()=>{
+    try{
+      const d=await fetchOWM(OWM);
+      WX=d.now; HOURS=d.hours; RES=buildRes(HOURS);
+      updateUI(WX); renderBars(RES);
+      setSt('Données temps réel · '+new Date().toLocaleTimeString('fr-TN'),true);
+    }catch(e){setSt('Erreur: '+e.message,false);}
+  };
+  await doFetch();
+  liveIv=setInterval(doFetch,5*60*1000); // refresh weather every 5min
+
+  // Start rAF loop for live chart
+  lastTick=0; demoTick=0;
+  rafId=requestAnimationFrame(rafLoop);
+
+  document.getElementById('bilan-month').value=new Date().getMonth();
+  await genBilan();
+  await genRapport();
+}
+
+function runDemo(){
+  if(rafId){cancelAnimationFrame(rafId);rafId=null;}
+  if(liveIv){clearInterval(liveIv);liveIv=null;}
+  OWM=''; // mark as demo
+  initMap(); if(!CLIVE) initLive();
+  setSt('MODE DÉMO — Simulation temps réel Gabes',true);
+
+  // Init fake weather
+  WX={temp:24.5,hum:58,windSpd:18.5,windDeg:45,gust:25,rain:0,clouds:20};
+  HOURS=DEMO_W.map((deg,i)=>({dt:new Date(Date.now()+i*3600000),temp:24+Math.sin(i/4)*3,windSpd:DEMO_S[i],windDeg:deg,rain:0}));
+  RES=buildRes(HOURS);
+  renderBars(RES);
+  updateUI(WX);
+
+  demoTick=0; lastTick=0;
+  rafId=requestAnimationFrame(rafLoop);
+
+  document.getElementById('bilan-month').value=new Date().getMonth();
+  setTimeout(()=>genBilan(),400);
+  document.getElementById('rout').textContent='Mode démo actif.\n\nLa courbe production se met à jour en temps réel (1 point/sec).\nLe vent évolue graduellement pour simuler les changements journaliers.\n\nPour données réelles + IA: entrez les clés API et cliquez Démarrer.';
+}
+
+window.addEventListener('load',()=>{
+  initMap();
+  initLive();
+  document.getElementById('bilan-month').value=new Date().getMonth();
+  runDemo();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Rapport GaBest — Fonctionnalités & Plan de présentation</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 16mm 18mm 16mm;
+    @bottom-center { content: counter(page) " / " counter(pages); }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1f2937;
+    font-size: 10.5pt;
+    line-height: 1.55;
+    margin: 0;
+    padding: 0;
+  }
+  .cover {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    background: linear-gradient(135deg, #0f766e 0%, #047857 45%, #065f46 100%);
+    color: white;
+    padding: 40mm 20mm;
+    margin: -18mm -16mm;
+    page-break-after: always;
+  }
+  .cover .tag {
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    font-size: 10pt;
+    opacity: .85;
+    border: 1px solid rgba(255,255,255,.5);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  .cover h1 {
+    font-size: 44pt;
+    margin: 0 0 10px 0;
+    font-weight: 800;
+    letter-spacing: -1px;
+  }
+  .cover h2 {
+    font-size: 20pt;
+    font-weight: 400;
+    margin: 0 0 30px 0;
+    opacity: .95;
+  }
+  .cover .meta {
+    font-size: 11pt;
+    opacity: .8;
+    border-top: 1px solid rgba(255,255,255,.3);
+    padding-top: 15px;
+    margin-top: auto;
+  }
+  h1.section {
+    font-size: 22pt;
+    color: #065f46;
+    border-bottom: 3px solid #10b981;
+    padding-bottom: 8px;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    page-break-before: always;
+  }
+  h1.section:first-of-type { page-break-before: auto; }
+  h2 {
+    font-size: 15pt;
+    color: #047857;
+    margin-top: 25px;
+    margin-bottom: 10px;
+    border-left: 4px solid #10b981;
+    padding-left: 10px;
+  }
+  h3 {
+    font-size: 12pt;
+    color: #065f46;
+    margin-top: 18px;
+    margin-bottom: 6px;
+  }
+  h4 {
+    font-size: 11pt;
+    color: #0f766e;
+    margin-top: 12px;
+    margin-bottom: 4px;
+  }
+  p { margin: 6px 0; text-align: justify; }
+  ul, ol { margin: 6px 0 10px 20px; padding: 0; }
+  li { margin-bottom: 4px; }
+  code {
+    background: #f3f4f6;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 9.5pt;
+    color: #b91c1c;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 10pt;
+    page-break-inside: avoid;
+  }
+  th, td {
+    border: 1px solid #d1d5db;
+    padding: 6px 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #065f46;
+    color: white;
+    font-weight: 600;
+  }
+  tr:nth-child(even) td { background: #f0fdf4; }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 15px 0;
+  }
+  .kpi {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border: 1px solid #10b981;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+  .kpi .num {
+    font-size: 22pt;
+    font-weight: 800;
+    color: #065f46;
+    display: block;
+  }
+  .kpi .lbl {
+    font-size: 9pt;
+    color: #047857;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .callout {
+    background: #ecfeff;
+    border-left: 4px solid #0891b2;
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin: 12px 0;
+    font-size: 10pt;
+  }
+  .ia-card {
+    background: #fafaf9;
+    border: 1px solid #e5e7eb;
+    border-left: 5px solid #10b981;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    page-break-inside: avoid;
+  }
+  .ia-card h3 { margin-top: 0; color: #065f46; }
+  .ia-card .meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 6px 0 8px 0;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 8.5pt;
+    font-weight: 600;
+  }
+  .badge.tech { background: #dbeafe; color: #1e40af; }
+  .badge.xai { background: #fce7f3; color: #9d174d; }
+  .badge.api { background: #fef3c7; color: #92400e; }
+  .toc {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 15px 20px;
+    margin: 20px 0;
+  }
+  .toc ol { margin: 0 0 0 20px; }
+  .toc a { color: #065f46; text-decoration: none; }
+  .cols-2 {
+    column-count: 2;
+    column-gap: 20px;
+    margin: 10px 0;
+  }
+  .cols-2 ul { margin: 0 0 0 16px; break-inside: avoid; }
+  .role-table td:first-child {
+    font-weight: 700;
+    background: #ecfdf5;
+    width: 25%;
+  }
+  .divider {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #10b981, transparent);
+    margin: 25px 0;
+  }
+  .step {
+    background: white;
+    border: 1px solid #d1d5db;
+    border-left: 4px solid #0891b2;
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin: 8px 0;
+    page-break-inside: avoid;
+  }
+  .step .num {
+    display: inline-block;
+    background: #0891b2;
+    color: white;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    text-align: center;
+    line-height: 22px;
+    font-weight: 700;
+    margin-right: 8px;
+    font-size: 9pt;
+  }
+  .step-title { font-weight: 700; color: #0c4a6e; }
+  .step-duration {
+    float: right;
+    background: #e0f2fe;
+    color: #0c4a6e;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 9pt;
+  }
+  .footer-note {
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px solid #e5e7eb;
+    font-size: 9pt;
+    color: #6b7280;
+    text-align: center;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ COUVERTURE ============ -->
+<div class="cover">
+  <span class="tag">Rapport Technique</span>
+  <h1>GaBest</h1>
+  <h2>Plateforme IA d'économie circulaire<br>& protection environnementale — Gabès, Tunisie</h2>
+  <div style="font-size:12pt;opacity:.95;margin-bottom:30px;">
+    <strong>Inventaire complet des fonctionnalités</strong><br>
+    <strong>Plan de présentation technique</strong>
+  </div>
+  <div class="meta">
+    Document généré le 19 avril 2026<br>
+    React · FastAPI · PyTorch · XGBoost · Supabase
+  </div>
+</div>
+
+<!-- ============ SOMMAIRE ============ -->
+<h1 class="section">Sommaire</h1>
+<div class="toc">
+  <ol>
+    <li>Contexte du projet et parties prenantes</li>
+    <li>Architecture générale et stack technique</li>
+    <li>Fonctionnalités standard (non-IA)
+      <ul>
+        <li>Authentification & onboarding</li>
+        <li>Dashboards multi-rôles</li>
+        <li>Cartographie, visualisation, temps réel</li>
+        <li>Reporting, export, UX</li>
+      </ul>
+    </li>
+    <li>Fonctionnalités IA — 8 modèles embarqués
+      <ul>
+        <li>GaBest · GabesHeal F2 · WindShield · GypsiFert</li>
+        <li>BioMatch · WaterShield · PhosphoMatch · IndustryMatch</li>
+      </ul>
+    </li>
+    <li>Architecture des données & intégrations</li>
+    <li>Plan de présentation technique (8 parties · 30 min)</li>
+    <li>Chiffres-clés et synthèse</li>
+  </ol>
+</div>
+
+<!-- ============ PARTIE 1 : CONTEXTE ============ -->
+<h1 class="section">1. Contexte du projet</h1>
+
+<p><strong>GaBest</strong> est une plateforme full-stack d'<strong>économie circulaire et de protection environnementale</strong> ciblant la région de <strong>Gabès (Tunisie)</strong>, caractérisée par une forte activité industrielle (phosphates, cimenterie, centrale thermique, port) et des enjeux sanitaires majeurs liés à la pollution atmosphérique et hydrique.</p>
+
+<h2>Parties prenantes</h2>
+<table class="role-table">
+  <tr><td>Agriculteurs</td><td>Cultures maraîchères, olives, dattes. Reçoivent alertes pollution, diagnostics maladies, valorisation des déchets, recommandations eau/sol.</td></tr>
+  <tr><td>Industriels</td><td>Phosphates, cimenterie, énergie, port. Optimisent leur production selon le vent et valorisent leurs sous-produits.</td></tr>
+  <tr><td>Recycleurs</td><td>Gèrent flux entrants pré-caractérisés, routage flotte, partenariats symbiotiques (Shapley).</td></tr>
+  <tr><td>Médecins</td><td>Suivent en temps réel les signalements patients et les zones critiques IA.</td></tr>
+  <tr><td>Autorités publiques</td><td>Compliance environnementale, pilotage politique d'économie circulaire.</td></tr>
+</table>
+
+<h2>Objectifs</h2>
+<ul>
+  <li>Anticiper les pics de pollution à 48 h sur 8 quartiers</li>
+  <li>Réduire les pertes agricoles (maladies, mauvaise irrigation, sols dégradés)</li>
+  <li>Transformer les déchets agricoles et industriels en revenus et énergie</li>
+  <li>Protéger la santé publique via un dashboard médical temps réel</li>
+  <li>Proposer un modèle scalable à l'échelle nationale tunisienne</li>
+</ul>
+
+<!-- ============ PARTIE 2 : ARCHITECTURE ============ -->
+<h1 class="section">2. Architecture générale &amp; stack technique</h1>
+
+<h2>Vue d'ensemble</h2>
+<div class="callout">
+  <strong>Architecture 3-tiers :</strong> Frontend React (SPA) ↔ Backend FastAPI (inférence IA) ↔ Supabase (PostgreSQL + Realtime) + OpenWeatherMap (API externe).
+</div>
+
+<h2>Stack technique</h2>
+<table>
+  <tr>
+    <th style="width:18%">Couche</th>
+    <th>Technologies</th>
+  </tr>
+  <tr>
+    <td><strong>Frontend</strong></td>
+    <td>React 18.3 · React Router 7.13 · TypeScript · Vite 6.3 · Tailwind CSS 4.1 · Radix UI (29 primitives) · Material-UI 7.3 · Recharts · Leaflet + React-Leaflet · Motion · Lucide · React Hook Form · Sonner</td>
+  </tr>
+  <tr>
+    <td><strong>Backend</strong></td>
+    <td>FastAPI · Uvicorn · PyTorch 2.2 · TorchVision · TorchGeometric 2.5 · scikit-learn 1.4 · XGBoost 2.0 · Pandas · NumPy · Pillow · Captum · SHAP</td>
+  </tr>
+  <tr>
+    <td><strong>Base de données</strong></td>
+    <td>Supabase (PostgreSQL) · Row-Level Security · Realtime (WebSocket)</td>
+  </tr>
+  <tr>
+    <td><strong>APIs externes</strong></td>
+    <td>OpenWeatherMap (pollution atmosphérique + météo) · OpenAI (prévu)</td>
+  </tr>
+  <tr>
+    <td><strong>Outils dev</strong></td>
+    <td>Vite HMR · ESBuild · PostCSS · Git · npm / pnpm</td>
+  </tr>
+</table>
+
+<h2>Flux de données</h2>
+<ol>
+  <li><strong>Collecte :</strong> capteurs simulés + signalements patients Supabase + OpenWeatherMap polling</li>
+  <li><strong>Inférence :</strong> FastAPI charge les modèles au <em>lifespan</em> (warm boot) et expose 12+ endpoints REST</li>
+  <li><strong>Diffusion :</strong> frontend React consomme les APIs + s'abonne au Realtime Supabase</li>
+  <li><strong>Action :</strong> utilisateur reçoit alertes, recommandations, matching, XAI</li>
+</ol>
+
+<!-- ============ PARTIE 3 : FONCTIONNALITÉS STANDARD ============ -->
+<h1 class="section">3. Fonctionnalités standard (non-IA)</h1>
+
+<h2>3.1 Authentification &amp; onboarding</h2>
+<ul>
+  <li>Sélection de rôle au premier accès : <strong>Agriculteur · Industriel · Recycleur · Médecin</strong></li>
+  <li>Formulaire de profil capture données agro-économiques (culture, surface, zone…)</li>
+  <li>Redirection conditionnelle vers le dashboard adapté</li>
+  <li>Persistance locale de session (localStorage)</li>
+</ul>
+
+<h2>3.2 Dashboards multi-rôles</h2>
+<table>
+  <tr>
+    <th>Rôle</th>
+    <th>Modules présents dans le dashboard</th>
+  </tr>
+  <tr>
+    <td><strong>Agriculteur</strong></td>
+    <td>Overview météo + alertes pollution · CropDiag (photo) · Advisor · BioMatch · GypsiFert · WaterShield</td>
+  </tr>
+  <tr>
+    <td><strong>Industriel</strong></td>
+    <td>Cartes de dispersion SO₂/PM · WindShield (ajustement production) · PhosphoMatch · IndustryMatch · Bilan ROI mensuel</td>
+  </tr>
+  <tr>
+    <td><strong>Recycleur</strong></td>
+    <td>Flux entrants caractérisés · Routage flotte · Partenariats symbiotiques avec Shapley · Métriques CO₂ évité</td>
+  </tr>
+  <tr>
+    <td><strong>Médecin</strong></td>
+    <td>Signalements patients temps réel (Supabase Realtime) · Carte zones IA GaBest · XAI attention + SHAP · Sélecteur de date historique</td>
+  </tr>
+</table>
+
+<h2>3.3 Cartographie &amp; visualisation</h2>
+<div class="cols-2">
+  <ul>
+    <li>Cartes interactives Leaflet + React-Leaflet</li>
+    <li>Zones pollution colorées (4 niveaux)</li>
+    <li>Panaches de dispersion (grilles lat/lon)</li>
+    <li>Matching géographique acheteurs/vendeurs</li>
+    <li>Graphiques Recharts (séries temporelles)</li>
+    <li>Tendances historiques SO₂/PM/NO₂</li>
+    <li>29 primitives Radix UI (Dialog, Popover, Sheet…)</li>
+    <li>Composants MUI + icônes Lucide (487)</li>
+    <li>Animations Motion (transitions fluides)</li>
+    <li>Thème clair/sombre (next-themes)</li>
+  </ul>
+</div>
+
+<h2>3.4 Données temps réel &amp; intégrations</h2>
+<ul>
+  <li><strong>Supabase Realtime :</strong> table <code>patients</code> avec champs JSONB pollution/rapport, souscription WebSocket côté médecin</li>
+  <li><strong>OpenWeatherMap :</strong> endpoints Air Pollution + Weather, 6 quartiers Gabès + centre-ville, rafraîchissement horaire</li>
+  <li><strong>Row-Level Security :</strong> lecture/insertion anonyme contrôlée</li>
+</ul>
+
+<h2>3.5 Reporting, export, UX</h2>
+<ul>
+  <li>Bilans économiques mensuels (amendes ANPE évitées, crédits carbone, gain santé, coûts produit)</li>
+  <li>Export HTML de dashboards (démo : <code>dashboard_gabes.html</code>)</li>
+  <li>Simulation ROI (WindShield, BioMatch) avec breakdown jour par jour</li>
+  <li>UX : Toasts (Sonner), drawers (Vaul), command palette (cmdk), confettis de succès</li>
+  <li>Navigation : <code>DashboardShell</code>, <code>StickyPillNav</code>, <code>MetricCard</code> réutilisables</li>
+</ul>
+
+<!-- ============ PARTIE 4 : IA ============ -->
+<h1 class="section">4. Fonctionnalités IA · 8 modèles embarqués</h1>
+
+<div class="callout">
+  <strong>Diversité des approches :</strong> 1 Graph Neural Network · 1 CNN (ResNet-50) · 1 Random Forest · 5 XGBoost. Tous les modèles sont explicables (SHAP, Grad-CAM, Captum, attention GAT).
+</div>
+
+<!-- 4.1 GaBest -->
+<div class="ia-card">
+  <h3>4.1 GaBest · Prédiction de zones critiques de pollution</h3>
+  <div class="meta">
+    <span class="badge tech">GNN + LSTM</span>
+    <span class="badge tech">PyTorch Geometric</span>
+    <span class="badge xai">XAI : GAT + SHAP + Captum</span>
+    <span class="badge api">GET /predict</span>
+  </div>
+  <p><strong>Entrée :</strong> 8 quartiers × 7 jours historiques (SO₂, PM2.5, PM10, NO₂, vent, humidité, signalements citoyens).</p>
+  <p><strong>Sortie :</strong> classification 4 classes (<em>Normal · Vigilance · Critique · Urgence</em>) par quartier, avec score de confiance.</p>
+  <p><strong>Explicabilité :</strong> poids d'attention GAT (influence des quartiers voisins) + SHAP KernelExplainer + Captum Integrated Gradients (attribution temporelle par jour).</p>
+  <p><strong>Artefact :</strong> <code>gabest_best.pt</code> (989 KB) · Scaler : <code>scaler.pkl</code> · Dataset : <code>signalements_gabes.csv</code> (2023-01-01 → 2024-12-31).</p>
+</div>
+
+<!-- 4.2 GabesHeal -->
+<div class="ia-card">
+  <h3>4.2 GabesHeal F2 · Diagnostic des maladies des cultures</h3>
+  <div class="meta">
+    <span class="badge tech">ResNet-50 fine-tuné</span>
+    <span class="badge tech">PyTorch + TorchVision</span>
+    <span class="badge xai">XAI : Grad-CAM</span>
+    <span class="badge api">POST /predict-disease</span>
+  </div>
+  <p><strong>Entrée :</strong> photo de feuille (JPEG, redimensionnée 224×224).</p>
+  <p><strong>Sortie :</strong> maladie + nom de plante en français + top-3 candidats + sévérité + traitement (produit + dosage + prix TND) + bbox + overlay Grad-CAM.</p>
+  <p><strong>Classes :</strong> 38 classes PlantVillage (pomme, maïs, vigne, tomate, pomme de terre…).</p>
+  <p><strong>Artefact :</strong> <code>gabeseal_f2_model.pth</code> (98.6 MB).</p>
+</div>
+
+<!-- 4.3 WindShield -->
+<div class="ia-card">
+  <h3>4.3 WindShield · Optimisation de production selon le vent</h3>
+  <div class="meta">
+    <span class="badge tech">Random Forest + modèle économique</span>
+    <span class="badge api">POST /wind/predict</span>
+    <span class="badge api">POST /wind/monthly-report</span>
+  </div>
+  <p><strong>Entrée :</strong> métadonnées usine (lat/lon, % production actuelle) + météo live (direction et vitesse du vent, température).</p>
+  <p><strong>Sortie :</strong> score de risque (faible/moyen/élevé), classification direction vent, prévision panache (grille lat/lon/z), ajustement production (-20 % à +30 %), économies estimées (DT).</p>
+  <p><strong>Modèle économique :</strong> amendes ANPE évitées + économies santé + crédits carbone + coûts produit, agrégés en rapport mensuel jour par jour.</p>
+  <p><strong>Artefact :</strong> <code>invisible_shield_models.pkl</code>.</p>
+</div>
+
+<!-- 4.4 GypsiFert -->
+<div class="ia-card">
+  <h3>4.4 GypsiFert · Dosage phosphogypse en amendement agricole</h3>
+  <div class="meta">
+    <span class="badge tech">3× XGBoost</span>
+    <span class="badge xai">XAI : SHAP</span>
+    <span class="badge api">POST /gypsifert/predict</span>
+  </div>
+  <p><strong>Entrée :</strong> pH, Ca, Mg, CEC, Cd, Pb, pluviométrie, type de sol, culture visée, surface (ha).</p>
+  <p><strong>Sortie :</strong> dosage optimal (t/ha), gain de rendement (%), score de contamination, feature importance SHAP.</p>
+  <p><strong>Artefacts :</strong> <code>model_dosage.pkl</code>, <code>model_gain.pkl</code>, <code>model_risk.pkl</code> + scaler + explainer.</p>
+</div>
+
+<!-- 4.5 BioMatch -->
+<div class="ia-card">
+  <h3>4.5 BioMatch · Valorisation énergétique des déchets agricoles</h3>
+  <div class="meta">
+    <span class="badge tech">XGBoost (prédiction HHV)</span>
+    <span class="badge api">POST /api/farmer/estimate</span>
+    <span class="badge api">GET /api/waste-types</span>
+  </div>
+  <p><strong>Entrée :</strong> type de déchet (10 types : luzerne, grignons d'olive, noyaux de dattes, paille de blé…), quantité (t), humidité (%).</p>
+  <p><strong>Sortie :</strong> pouvoir calorifique supérieur HHV (MJ/kg), énergie contenue (MWh), qualité (premium/standard/low), valeur marché (DT).</p>
+  <p><strong>Matching :</strong> 7 usines (cimenterie, biomasse, biogaz, biocarburant, compost) avec contraintes (PCI min, tonnage, acceptation) + 5 recycleurs spécialisés.</p>
+</div>
+
+<!-- 4.6 WaterShield -->
+<div class="ia-card">
+  <h3>4.6 WaterShield · Qualité de l'eau d'irrigation</h3>
+  <div class="meta">
+    <span class="badge tech">6× XGBoost</span>
+    <span class="badge api">POST /watershield/predict</span>
+  </div>
+  <p><strong>Entrée :</strong> source (puits, oasis, canal, surface), distance à GCT (km), indices visuels (couleur, odeur), pluviométrie, saison.</p>
+  <p><strong>Sortie :</strong> score de sécurité (0–100), bande (<em>sûre · à surveiller · dégradée · critique</em>), 4 probabilités de contaminants (salinité, pH anormal, métaux lourds, turbidité), cultures compatibles, recommandation (traiter / diluer / changer de source), chimie imputée.</p>
+  <p><strong>Artefacts :</strong> 6 modèles XGBoost + feature_names + config.</p>
+</div>
+
+<!-- 4.7 PhosphoMatch -->
+<div class="ia-card">
+  <h3>4.7 PhosphoMatch · Matching lots phosphogypse → acheteurs</h3>
+  <div class="meta">
+    <span class="badge tech">Scoring sous contraintes</span>
+    <span class="badge api">Frontend (lib/phosphomatch.ts)</span>
+  </div>
+  <p><strong>Entrée :</strong> caractéristiques du lot (pureté, fluor, P₂O₅, humidité, métaux lourds, radioactivité, quantité).</p>
+  <p><strong>Sortie :</strong> liste d'acheteurs classés (cimenterie, plâtre, engrais, BTP, recyclage) avec score de compatibilité selon contraintes max autorisées par acheteur.</p>
+  <p><strong>Tiers qualité :</strong> standard, haute-pureté, bas-grade (presets).</p>
+</div>
+
+<!-- 4.8 IndustryMatch -->
+<div class="ia-card">
+  <h3>4.8 IndustryMatch · Routage déchets industriels → acheteurs agronomes</h3>
+  <div class="meta">
+    <span class="badge tech">Scoring heuristique</span>
+    <span class="badge xai">XAI via GypsiFert (SHAP)</span>
+  </div>
+  <p><strong>Entrée :</strong> 8 types de déchets industriels (phosphogypse, boues organiques, cendres volantes, laitier, HDPE, eaux de lavage, poussière de gypse, résidus de chaux), quantité, zone, pureté.</p>
+  <p><strong>Sortie :</strong> acheteurs (agriculteurs, cimenterie, plâtrerie, BTP, compost, engrais) avec distance, revenu estimé, CO₂ évité, attribution SHAP pour le risque agronomique.</p>
+</div>
+
+<!-- ============ PARTIE 5 : DONNÉES ============ -->
+<h1 class="section">5. Architecture des données &amp; intégrations</h1>
+
+<h2>5.1 Schéma Supabase</h2>
+<p>Table <code>public.patients</code> pour les signalements médicaux et l'exposition à la pollution :</p>
+<ul>
+  <li><code>id</code>, <code>created_at</code>, <code>prenom</code>, <code>age</code>, <code>zone</code></li>
+  <li><code>symptomes</code> (array), <code>duree</code>, <code>profil</code> (array)</li>
+  <li><code>pollution</code> (JSONB : SO₂, PM2.5, PM10, NO₂, AQI)</li>
+  <li><code>rapport</code> (JSONB : analyse IA + recommandations)</li>
+</ul>
+<p><strong>Realtime activé</strong> pour le dashboard médecin · <strong>RLS</strong> pour accès anonyme contrôlé.</p>
+
+<h2>5.2 Endpoints FastAPI</h2>
+<table>
+  <tr><th>Endpoint</th><th>Méthode</th><th>Rôle</th></tr>
+  <tr><td><code>/health</code></td><td>GET</td><td>Statut modèles, taille dataset, dernière date</td></tr>
+  <tr><td><code>/predict</code></td><td>GET</td><td>Prédictions GaBest (paramètre <code>date</code>)</td></tr>
+  <tr><td><code>/predict-disease</code></td><td>POST</td><td>Diagnostic maladie culture (multipart image)</td></tr>
+  <tr><td><code>/wind/predict</code></td><td>POST</td><td>Recommandation WindShield temps réel</td></tr>
+  <tr><td><code>/wind/monthly-report</code></td><td>POST</td><td>Bilan économique 30 jours</td></tr>
+  <tr><td><code>/wind/factories</code></td><td>GET</td><td>Liste des usines monitorées</td></tr>
+  <tr><td><code>/watershield/predict</code></td><td>POST</td><td>Évaluation sécurité eau irrigation</td></tr>
+  <tr><td><code>/gypsifert/predict</code></td><td>POST</td><td>Dosage amendement phosphogypse</td></tr>
+  <tr><td><code>/api/farmer/estimate</code></td><td>POST</td><td>Estimation HHV + valeur énergétique</td></tr>
+  <tr><td><code>/api/waste-types</code></td><td>GET</td><td>Liste des types de déchets BioMatch</td></tr>
+</table>
+
+<h2>5.3 OpenWeatherMap</h2>
+<ul>
+  <li><code>/data/2.5/air_pollution</code> → SO₂, PM2.5, PM10, NO₂, AQI</li>
+  <li><code>/data/2.5/weather</code> → température, humidité, vent (vitesse + direction)</li>
+  <li>Zones : 6 quartiers Gabès + centre-ville · Rafraîchissement 2-4× par jour</li>
+</ul>
+
+<!-- ============ PARTIE 6 : PLAN DE PRÉSENTATION ============ -->
+<h1 class="section">6. Plan de présentation technique</h1>
+
+<div class="callout">
+  <strong>Format suggéré :</strong> 25–30 minutes d'exposé + démo live + 3 minutes Q/R.<br>
+  <strong>Public cible :</strong> équipes techniques, jury académique, ou partenaires institutionnels.
+</div>
+
+<div class="step">
+  <span class="step-duration">3 min</span>
+  <div class="step-title"><span class="num">1</span>Introduction &amp; contexte</div>
+  <ul>
+    <li>Problématique Gabès : pollution industrielle, santé publique, gaspillage agricole</li>
+    <li>Vision GaBest : plateforme unifiée IA + économie circulaire</li>
+    <li>Parties prenantes : agriculteurs, industriels, recycleurs, médecins, autorités</li>
+  </ul>
+</div>
+
+<div class="step">
+  <span class="step-duration">5 min</span>
+  <div class="step-title"><span class="num">2</span>Architecture globale</div>
+  <ul>
+    <li>Schéma : React ↔ FastAPI ↔ modèles IA · Supabase · APIs externes</li>
+    <li>Justification des choix : React 18/Vite (DX), Radix/Tailwind (design system), FastAPI (async + Pydantic), Supabase (Realtime + RLS out-of-the-box)</li>
+    <li>Flux temps réel : WebSocket Supabase + polling OpenWeatherMap</li>
+  </ul>
+</div>
+
+<div class="step">
+  <span class="step-duration">5 min</span>
+  <div class="step-title"><span class="num">3</span>Fonctionnalités standard par rôle</div>
+  <ul>
+    <li>Parcours Agriculteur : onboarding → dashboard → alertes → actions</li>
+    <li>Parcours Industriel : cartes dispersion → matching → ROI</li>
+    <li>Parcours Recycleur : flux entrants → routage → symbiose</li>
+    <li>Parcours Médecin : signalements temps réel → zones IA</li>
+    <li>Démo UI : maps Leaflet, graphs Recharts, composants réutilisables</li>
+  </ul>
+</div>
+
+<div class="step">
+  <span class="step-duration">10 min</span>
+  <div class="step-title"><span class="num">4</span>Les 8 modèles IA (cœur de la présentation)</div>
+  <table>
+    <tr><th>#</th><th>Module</th><th>Stack</th><th>Angle de démo</th></tr>
+    <tr><td>1</td><td>GaBest</td><td>GNN + LSTM (PyTorch Geometric)</td><td>Attention GAT + SHAP sur graphe quartiers</td></tr>
+    <tr><td>2</td><td>GabesHeal F2</td><td>ResNet-50 + Grad-CAM</td><td>Upload photo → diagnostic + heatmap</td></tr>
+    <tr><td>3</td><td>WindShield</td><td>Random Forest + économie</td><td>Carte panache + bilan mensuel DT</td></tr>
+    <tr><td>4</td><td>GypsiFert</td><td>3× XGBoost + SHAP</td><td>Dosage optimal + feature importance</td></tr>
+    <tr><td>5</td><td>BioMatch</td><td>XGBoost (HHV)</td><td>Déchet → énergie → valeur</td></tr>
+    <tr><td>6</td><td>WaterShield</td><td>6× XGBoost</td><td>Score sécurité + cultures compatibles</td></tr>
+    <tr><td>7</td><td>PhosphoMatch</td><td>Scoring contraint</td><td>Matching lot → acheteurs</td></tr>
+    <tr><td>8</td><td>IndustryMatch</td><td>Scoring + SHAP</td><td>Routage déchets industriels</td></tr>
+  </table>
+  <p><strong>Points différenciants :</strong> explicabilité systématique (SHAP, Grad-CAM, Captum, attention), diversité des approches, déploiement léger (CPU, pas de GPU requis).</p>
+</div>
+
+<div class="step">
+  <span class="step-duration">5 min</span>
+  <div class="step-title"><span class="num">5</span>Démo live</div>
+  <ol>
+    <li><code>python backend/main.py</code> → API sur <code>:8000</code></li>
+    <li><code>npm run dev</code> → front sur <code>:5173</code></li>
+    <li>Scénario guidé :
+      <ul>
+        <li>Login agriculteur → upload photo malade → Grad-CAM</li>
+        <li>Switch médecin → dashboard GaBest zones IA → date <code>2024-06-15</code></li>
+        <li>Switch industriel → WindShield → rapport mensuel</li>
+      </ul>
+    </li>
+  </ol>
+</div>
+
+<div class="step">
+  <span class="step-duration">2 min</span>
+  <div class="step-title"><span class="num">6</span>Sécurité, performance, scalabilité</div>
+  <ul>
+    <li><strong>Sécurité :</strong> RLS Supabase, CORS FastAPI, variables d'environnement</li>
+    <li><strong>Performance :</strong> lazy-loading React, modèles chargés au lifespan FastAPI, cache prédictions</li>
+    <li><strong>Scalabilité :</strong> containerisation Docker possible, FastAPI async, stateless inference</li>
+  </ul>
+</div>
+
+<div class="step">
+  <span class="step-duration">2 min</span>
+  <div class="step-title"><span class="num">7</span>Roadmap &amp; perspectives</div>
+  <ul>
+    <li>Version mobile (React Native ou PWA)</li>
+    <li>Streaming temps réel via capteurs IoT</li>
+    <li>Extension à d'autres gouvernorats tunisiens</li>
+    <li>Intégration LLM (OpenAI déjà configuré en <code>.env.local</code>) pour conseils conversationnels</li>
+  </ul>
+</div>
+
+<div class="step">
+  <span class="step-duration">3 min</span>
+  <div class="step-title"><span class="num">8</span>Questions &amp; réponses</div>
+</div>
+
+<!-- ============ PARTIE 7 : CHIFFRES-CLÉS ============ -->
+<h1 class="section">7. Chiffres-clés &amp; synthèse</h1>
+
+<div class="kpi-grid">
+  <div class="kpi"><span class="num">8</span><span class="lbl">Modèles IA</span></div>
+  <div class="kpi"><span class="num">12+</span><span class="lbl">Endpoints FastAPI</span></div>
+  <div class="kpi"><span class="num">70+</span><span class="lbl">Composants React</span></div>
+  <div class="kpi"><span class="num">4</span><span class="lbl">Rôles utilisateurs</span></div>
+  <div class="kpi"><span class="num">8</span><span class="lbl">Quartiers Gabès</span></div>
+  <div class="kpi"><span class="num">38</span><span class="lbl">Maladies détectées</span></div>
+  <div class="kpi"><span class="num">10</span><span class="lbl">Types déchets</span></div>
+  <div class="kpi"><span class="num">2 ans</span><span class="lbl">Historique dataset</span></div>
+</div>
+
+<h2>Répartition des modèles IA</h2>
+<table>
+  <tr><th>Approche</th><th>Nombre</th><th>Modèles</th></tr>
+  <tr><td>Graph Neural Network</td><td>1</td><td>GaBest (GAT + LSTM)</td></tr>
+  <tr><td>CNN (vision)</td><td>1</td><td>GabesHeal F2 (ResNet-50)</td></tr>
+  <tr><td>Random Forest</td><td>1</td><td>WindShield</td></tr>
+  <tr><td>XGBoost</td><td>5</td><td>GypsiFert (×3), BioMatch, WaterShield (×6 classifieurs)</td></tr>
+  <tr><td>Scoring heuristique</td><td>2</td><td>PhosphoMatch, IndustryMatch</td></tr>
+</table>
+
+<h2>Synthèse</h2>
+<p>GaBest est une plateforme <strong>complète, modulaire et explicable</strong>, qui couvre l'ensemble de la chaîne environnementale de Gabès : de la détection de la pollution à la valorisation des déchets, en passant par la santé publique et la compliance industrielle. Son architecture 3-tiers, sa diversité de modèles IA et son approche systématique de l'explicabilité en font un candidat solide pour un déploiement opérationnel en Tunisie et potentiellement dans d'autres régions soumises à des pressions environnementales similaires.</p>
+
+<div class="footer-note">
+  Rapport généré le 19 avril 2026 · Plateforme GaBest · Gabès, Tunisie
+</div>
+
+</body>
+</html>

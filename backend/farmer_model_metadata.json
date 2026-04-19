@@ -1,0 +1,130 @@
+{
+  "model_name": "BioMatch Farmer HHV Model",
+  "version": "2.0.0",
+  "description": "Farmer-friendly: inputs are waste_type + moisture + season",
+  "farmer_inputs": [
+    "waste_type (string)",
+    "moisture % (float)",
+    "season Q1-Q4 (string)"
+  ],
+  "auto_features": [
+    "C",
+    "H",
+    "N",
+    "S",
+    "Ash — looked up from Phyllis2 table automatically"
+  ],
+  "all_features": [
+    "waste_type_enc",
+    "moisture",
+    "season_num",
+    "C",
+    "H",
+    "N",
+    "S",
+    "Ash"
+  ],
+  "label_encoder": {
+    "0": "alfalfa",
+    "1": "date_seeds",
+    "2": "olive_leaves",
+    "3": "olive_pomace",
+    "4": "palm_fronds",
+    "5": "pomegranate_peels",
+    "6": "sugarcane_bagasse",
+    "7": "tomato_stems",
+    "8": "wheat_straw",
+    "9": "wood_chips"
+  },
+  "phyllis2_table": {
+    "olive_pomace": {
+      "C": 49.8,
+      "H": 6.65,
+      "N": 1.02,
+      "S": 0.11,
+      "Ash": 4.85
+    },
+    "palm_fronds": {
+      "C": 44.5,
+      "H": 5.88,
+      "N": 0.93,
+      "S": 0.1,
+      "Ash": 4.7
+    },
+    "tomato_stems": {
+      "C": 41.2,
+      "H": 5.55,
+      "N": 2.08,
+      "S": 0.31,
+      "Ash": 8.1
+    },
+    "pomegranate_peels": {
+      "C": 43.7,
+      "H": 5.78,
+      "N": 1.83,
+      "S": 0.13,
+      "Ash": 5.15
+    },
+    "alfalfa": {
+      "C": 44.3,
+      "H": 5.98,
+      "N": 2.95,
+      "S": 0.23,
+      "Ash": 8.25
+    },
+    "date_seeds": {
+      "C": 47.2,
+      "H": 6.38,
+      "N": 1.28,
+      "S": 0.04,
+      "Ash": 1.35
+    },
+    "olive_leaves": {
+      "C": 47.1,
+      "H": 6.08,
+      "N": 1.52,
+      "S": 0.1,
+      "Ash": 7.35
+    },
+    "wheat_straw": {
+      "C": 45.9,
+      "H": 5.9,
+      "N": 0.62,
+      "S": 0.1,
+      "Ash": 5.17
+    },
+    "wood_chips": {
+      "C": 50.6,
+      "H": 6.22,
+      "N": 0.17,
+      "S": 0.01,
+      "Ash": 0.42
+    },
+    "sugarcane_bagasse": {
+      "C": 45.8,
+      "H": 5.95,
+      "N": 0.35,
+      "S": 0.03,
+      "Ash": 2.25
+    }
+  },
+  "metrics": {
+    "R2": 0.9665,
+    "RMSE": 0.3288,
+    "MAE": 0.2707,
+    "CV_R2_mean": 0.9704
+  },
+  "n_samples": 254,
+  "waste_types": [
+    "olive_pomace",
+    "palm_fronds",
+    "tomato_stems",
+    "pomegranate_peels",
+    "alfalfa",
+    "date_seeds",
+    "olive_leaves",
+    "wheat_straw",
+    "wood_chips",
+    "sugarcane_bagasse"
+  ]
+}

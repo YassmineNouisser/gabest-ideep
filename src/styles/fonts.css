@@ -1,0 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=Noto+Naskh+Arabic:wght@400;700&display=swap');
+
+:root {
+  --font-playfair: 'Playfair Display', serif;
+  --font-display: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  --font-ibm-sans: 'IBM Plex Sans', sans-serif;
+  --font-ibm-mono: 'IBM Plex Mono', monospace;
+  --font-naskh: 'Noto Naskh Arabic', serif;
+}
+
+body {
+  font-family: var(--font-display);
+}
