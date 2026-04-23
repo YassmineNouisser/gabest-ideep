@@ -109,7 +109,7 @@ export function WaterShieldFlow({
     } catch (err: any) {
       setError(
         err?.message?.includes('Failed to fetch') || err?.message?.includes('NetworkError')
-          ? "L'API WaterShield n'est pas accessible. Lance le backend : cd backend && python main.py"
+          ? "L'API WaterShield n'est pas accessible. Lance le backend : cd python-api && python main.py"
           : err?.message ?? 'Erreur inconnue'
       );
     } finally {

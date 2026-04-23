@@ -1,5 +1,5 @@
 # Backend Python (déployé ailleurs : Render / Railway / Fly)
-backend/
+python-api/
 
 # Sous-projets et artefacts de recherche ML (pas nécessaires au build Vite)
 gabesheal/

@@ -16,9 +16,9 @@
 
   ### Lancer les 2 serveurs (2 terminaux)
 
-  **Terminal 1 — backend IA** (première fois seulement : `pip install -r backend/requirements.txt` dans un venv)
+  **Terminal 1 — backend IA** (première fois seulement : `pip install -r python-api/requirements.txt` dans un venv)
   ```bash
-  cd backend
+  cd python-api
   source .venv/bin/activate
   python main.py
   # API sur http://127.0.0.1:8000
@@ -34,5 +34,5 @@
   Le dataset couvre 2023-01-01 → 2024-12-31 — utilise le sélecteur de date dans la bannière
   pour explorer différents jours (essaye `2024-06-15` pour une distribution mixte).
 
-  Voir [backend/README.md](backend/README.md) pour le détail de l'API et des explications XAI.
+  Voir [python-api/README.md](python-api/README.md) pour le détail de l'API et des explications XAI.
   

@@ -98,7 +98,7 @@ export function CropDiagFlow({
     } catch (err: any) {
       setError(
         err?.message?.includes('Failed to fetch') || err?.message?.includes('NetworkError')
-          ? "L'API GabesHeal F2 n'est pas accessible. Lance le backend : cd backend && python main.py"
+          ? "L'API GabesHeal F2 n'est pas accessible. Lance le backend : cd python-api && python main.py"
           : err?.message ?? 'Erreur inconnue'
       );
     } finally {
