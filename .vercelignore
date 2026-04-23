@@ -1,0 +1,36 @@
+# Backend Python (déployé ailleurs : Render / Railway / Fly)
+backend/
+
+# Sous-projets et artefacts de recherche ML (pas nécessaires au build Vite)
+gabesheal/
+phosphomatch-gabes/
+watershield_app/
+gabeseal_f2_model/
+dechets agriculture en valeur energitique /
+model de recommedation de prod selon vent /
+model des zones critiques /
+phosphogypse en ressources /
+
+# Rapports et médias lourds
+*.pdf
+*.mp4
+*.mov
+RAPPORT_GABEST.html
+PLAN_PRESENTATION_GABEST.html
+dashboard_gabes*.html
+screenshots-inspiration/
+WhatsApp*.jpeg
+
+# SQL migrations (côté Supabase, pas dans le build)
+supabase-admin-users.sql
+supabase-schema.sql
+
+# Docs
+ATTRIBUTIONS.md
+
+# OS / dev
+.DS_Store
+.env
+.env.local
+.env.*
+!.env.example
